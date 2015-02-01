@@ -7,16 +7,16 @@ test/%.out.py: content/%.md testblocks
 	mkdir -p test
 	./testblocks < $< > $@
 
-test: $(patsubst content/%.md, test/%.out.py, $(shell ls content/*.md))
+test: $(patsubst content/%.md, test/%.out.py, $(shell find content -name "*.md"))
 	for test in $^ ; do \
 		python $$test -v ; \
 	done
 
 site/%.html: content/%.md
-	mkdir -p site
+	mkdir -p $(shell dirname $@)
 	pandoc --standalone < $< > $@
 
-site: $(patsubst content/%.md, site/%.html, $(shell ls content/*.md))
+site: $(patsubst content/%.md, site/%.html, $(shell find content -name "*.md"))
 
 clean:
 	rm -rf test site
