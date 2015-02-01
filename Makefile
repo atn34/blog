@@ -16,7 +16,12 @@ site/%.html: content/%.md
 	mkdir -p $(shell dirname $@)
 	pandoc --standalone < $< > $@
 
-site: $(patsubst content/%.md, site/%.html, $(shell find content -name "*.md"))
+site/%.html: content/%.jinja $(shell find content -name "*.md") jinja.py
+	mkdir -p $(shell dirname $@)
+	python jinja.py < $< | pandoc --standalone > $@
+
+site: $(patsubst content/%.md, site/%.html, $(shell find content -name "*.md")) \
+	$(patsubst content/%.jinja, site/%.html, $(shell find content -name "*.jinja"))
 
 clean:
 	rm -rf test site

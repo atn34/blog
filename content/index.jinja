@@ -1,0 +1,8 @@
+---
+title: My Site!
+---
+
+#Pages#
+{% for post in md_files %}
+  - [{{post.title}}]({{post.link}})
+{% endfor %}
