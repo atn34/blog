@@ -35,4 +35,4 @@ site: $(patsubst content/%.md, site/%.html, $(shell find content -name "*.md")) 
 
 clean:
 	rm -rf test site
-	rm -f testblocks testblocks.hi testblocks.o
+	rm -f testblocks *.hi *.o *.pyc
