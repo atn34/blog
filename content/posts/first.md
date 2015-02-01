@@ -1,8 +1,7 @@
 ---
 title: First Post!
+date: February 01, 2015
 ---
-
-# This is my first post! #
 
 Here is an example of some python code.
 
