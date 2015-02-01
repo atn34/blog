@@ -1,12 +1,12 @@
 import           Data.List
 import           Text.Pandoc
 
-extractPythonRepl ((CodeBlock _ s) : blocks) | ">>>" `isPrefixOf` s =
+extractPythonRepl ((CodeBlock (_, "python":_, _) s) : blocks) | ">>>" `isPrefixOf` s =
         s : extractPythonRepl blocks
 extractPythonRepl (block : blocks) = extractPythonRepl blocks
 extractPythonRepl [] = []
 
-extractPythonCode ((CodeBlock (_, "python":_, _) s) : blocks) =
+extractPythonCode ((CodeBlock (_, "python":_, _) s) : blocks) | not (">>>" `isPrefixOf` s) =
         s : extractPythonCode blocks
 extractPythonCode (block : blocks) = extractPythonCode blocks
 extractPythonCode [] = []

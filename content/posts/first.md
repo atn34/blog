@@ -14,7 +14,7 @@ def fact(n):
 
 And here is how to use it!
 
-```
+```python
 >>> fact(0)
 1
 >>> fact(5)
