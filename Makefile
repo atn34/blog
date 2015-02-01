@@ -12,16 +12,19 @@ test: $(patsubst content/%.md, test/%.py, $(shell find content -name "*.md"))
 		python $$test -v ; \
 	done
 
-site/%.html: content/%.md
+site/%.html: content/%.md default.html
 	mkdir -p $(shell dirname $@)
-	pandoc --standalone < $< > $@
+	pandoc --template default.html --standalone < $< > $@
 
-site/%.html: content/%.jinja $(shell find content -name "*.md") jinja.py
+site/%.html: content/%.md.jinja $(shell find content -name "*.md") jinja.py default.html
 	mkdir -p $(shell dirname $@)
-	python jinja.py < $< | pandoc --standalone > $@
+	python jinja.py < $< | pandoc --template default.html --standalone > $@
+
+site/%: content/%
+	cp $< $@
 
 site: $(patsubst content/%.md, site/%.html, $(shell find content -name "*.md")) \
-	$(patsubst content/%.jinja, site/%.html, $(shell find content -name "*.jinja"))
+	$(patsubst content/%.md.jinja, site/%.html, $(shell find content -name "*.md.jinja")) \
 
 clean:
 	rm -rf test site
