@@ -1,6 +1,6 @@
-.PHONY: test site
+.PHONY: test site serve
 
-testblocks:
+testblocks: testblocks.hs
 	ghc --make testblocks.hs
 
 test/%.py: content/%.md testblocks
