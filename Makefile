@@ -33,6 +33,9 @@ site: $(patsubst content/%.md, site/%.html, $(shell find content -name "*.md")) 
 	$(patsubst content/%.jinja, site/%, $(shell find content -name "*.jinja")) \
 	$(patsubst content/%, site/%, $(shell find content -name "*.css"))
 
+serve: site
+	cd site && python -m SimpleHTTPServer
+
 clean:
 	rm -rf test site
 	rm -f testblocks *.hi *.o *.pyc
