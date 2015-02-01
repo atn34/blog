@@ -3,11 +3,11 @@
 testblocks:
 	ghc --make testblocks.hs
 
-test/%.out.py: content/%.md testblocks
-	mkdir -p test
+test/%.py: content/%.md testblocks
+	mkdir -p $(shell dirname $@)
 	./testblocks < $< > $@
 
-test: $(patsubst content/%.md, test/%.out.py, $(shell find content -name "*.md"))
+test: $(patsubst content/%.md, test/%.py, $(shell find content -name "*.md"))
 	for test in $^ ; do \
 		python $$test -v ; \
 	done
