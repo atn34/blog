@@ -78,4 +78,5 @@ target/
 
 ### custom
 testblocks
-*.out.py
+test
+site
