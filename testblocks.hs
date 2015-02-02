@@ -22,6 +22,7 @@ extractDocTest = formatBlocks . readBlocks . readDoc
             let docstring = concat $ extractPythonRepl blocks in
             let code = concat $ extractPythonCode blocks in
             unlines [
+            "#!/usr/bin/env python",
             "\"\"\"",
             docstring,
             "\"\"\"",
@@ -29,7 +30,8 @@ extractDocTest = formatBlocks . readBlocks . readDoc
             code,
             "",
             "import doctest",
-            "doctest.testmod()"
+            "import sys",
+            "sys.exit(doctest.testmod()[0])"
             ]
 
 main = interact extractDocTest

@@ -6,11 +6,18 @@ testblocks: testblocks.hs
 test/%.py: content/%.md testblocks
 	mkdir -p $(shell dirname $@)
 	./testblocks < $< > $@
+	chmod +x $@
 
 test: $(patsubst content/%.md, test/%.py, $(shell find content -name "*.md"))
+	@errors=0; \
 	for test in $^ ; do \
-		python $$test -v ; \
-	done
+		echo running $$test; \
+		$$test || errors=`expr $$errors + 1`; \
+		count=`expr $$count + 1`; \
+	done; \
+	echo `expr $$count - $$errors` of $$count tests pass; \
+	exit $$errors
+
 
 site/%.html: content/%.md default.html
 	mkdir -p $(shell dirname $@)
