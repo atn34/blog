@@ -1,3 +1,7 @@
+---
+title-prefix: Stuff Andrew Likes
+title: Categories
+---
 # Categories: #
 {% for category, posts in posts|invert_by('categories') %}
 
