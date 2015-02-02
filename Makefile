@@ -31,7 +31,7 @@ site/%: content/%
 site: $(patsubst content/%.md, site/%.html, $(shell find content -name "*.md")) \
 	$(patsubst content/%.mdjinja, site/%.html, $(shell find content -name "*.mdjinja")) \
 	$(patsubst content/%.jinja, site/%, $(shell find content -name "*.jinja")) \
-	$(patsubst content/%, site/%, $(shell find content -name "*.css"))
+	$(patsubst content/%, site/%, $(shell find content -type f ! -name "*.md" ! -name "*jinja"))
 
 serve: site
 	cd site && python -m SimpleHTTPServer
