@@ -1,6 +1,6 @@
 ---
 title: First Post!
-date: February 01, 2015
+date: 2015-02-01
 categories: [python]
 ---
 
