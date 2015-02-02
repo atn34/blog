@@ -10,6 +10,10 @@ def _test():
     return doctest.testmod()
 
 def invert_by(ds, key, sort=True):
+    """
+    >>> invert_by([{'a': ['b','c']}], 'a')
+    [('b', [{'a': ['b', 'c']}]), ('c', [{'a': ['b', 'c']}])]
+    """
     result = defaultdict(list)
     for d in ds:
         vs = d[key] if isinstance(d[key], list) else [d[key]]
