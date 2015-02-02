@@ -40,17 +40,6 @@ $endfor$
             <a class="extra" href="/">home</a>
             <a class="extra" href="/categories.html">categories</a>
           </div>
-$if(title)$
-<div id="$idprefix$header">
-<h1 class="title">$title$</h1>
-$if(subtitle)$
-<h1 class="subtitle">$subtitle$</h1>
-$endif$
-$for(author)$
-<h2 class="author">$author$</h2>
-$endfor$
-</div>
-$endif$
 $if(toc)$
 <div id="$idprefix$TOC">
 $toc$
