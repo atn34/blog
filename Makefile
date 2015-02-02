@@ -8,11 +8,11 @@ test/%.py: content/%.md testblocks
 	./testblocks < $< > $@
 	chmod +x $@
 
-test: $(patsubst content/%.md, test/%.py, $(shell find content -name "*.md"))
+test: $(patsubst content/%.md, test/%.py, $(shell find content -name "*.md")) jinja_test.py
 	@errors=0; \
 	for test in $^ ; do \
 		echo running $$test; \
-		$$test || errors=`expr $$errors + 1`; \
+		./$$test || errors=`expr $$errors + 1`; \
 		count=`expr $$count + 1`; \
 	done; \
 	echo `expr $$count - $$errors` of $$count tests pass; \

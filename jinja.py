@@ -5,6 +5,10 @@ import os
 import yaml
 from collections import defaultdict
 
+def _test():
+    import doctest
+    return doctest.testmod()
+
 def invert_by(ds, key, sort=True):
     result = defaultdict(list)
     for d in ds:
@@ -17,12 +21,21 @@ def invert_by(ds, key, sort=True):
         return result.iteritems()
 
 def limit(items, count):
+    """
+    >>> list(limit(xrange(5), 10))
+    [0, 1, 2, 3, 4]
+    """
     n = 0
     while n < count:
-        if hasattr(items, 'next'):
-            yield items.next()
-        else:
-            yield items[n]
+        try:
+            if hasattr(items, 'next'):
+                yield items.next()
+            else:
+                yield items[n]
+        except StopIteration:
+            break
+        except IndexError:
+            break
         n += 1
 
 env = Environment(trim_blocks=True)
