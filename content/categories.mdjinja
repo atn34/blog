@@ -1,0 +1,10 @@
+# Categories:
+{% for category, posts in md_files|invert_by('categories') %}
+
+## {{category}} ##
+<ul class="posts">
+{% for post in posts|sort(attribute='date', reverse=True) %}
+<li><span>{{post.date}}</span> &raquo; <a href="{{post.link}}">{{post.title}}</a></li>
+{% endfor %}
+</ul>
+{% endfor %}

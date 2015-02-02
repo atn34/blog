@@ -1,8 +1,21 @@
-from jinja2 import Template
+from jinja2 import Environment
 import fnmatch
 import sys
 import os
 import yaml
+from collections import defaultdict
+
+def invert_by(ds, key):
+    result = defaultdict(list)
+    for d in ds:
+        vs = d[key] if isinstance(d[key], list) else [d[key]]
+        for v in vs:
+            result[v].append(d)
+    return result.iteritems()
+
+env = Environment(trim_blocks=True)
+
+env.filters['invert_by'] = invert_by
 
 def parse_md_file(file_name):
     with open(file_name, 'r') as f:
@@ -26,5 +39,4 @@ def get_md_files():
             yield parse_md_file(os.path.join(root, filename))
 
 if __name__ == '__main__':
-    template = Template(sys.stdin.read())
-    print template.render(md_files=get_md_files())
+    print env.from_string(sys.stdin.read()).render(md_files=get_md_files())

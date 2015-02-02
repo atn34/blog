@@ -1,6 +1,7 @@
 ---
 title: First Post!
 date: February 01, 2015
+categories: [python]
 ---
 
 Here is an example of some python code.
