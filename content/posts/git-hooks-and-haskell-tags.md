@@ -2,8 +2,7 @@
 layout: post
 title:  "git hooks and haskell tags"
 date:   2014-04-09
-categories: git
-tags: git haskell vim ctags
+categories: [git,haskell,vim,ctags]
 ---
 
 # git hooks and tags #

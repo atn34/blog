@@ -2,8 +2,7 @@
 layout: post
 title:  "cmus album art"
 date:   2014-04-05
-categories: bash
-tags: bash cmus beets music
+categories: [bash,cmus,beets,music]
 ---
 
 # cmus #

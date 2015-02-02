@@ -2,8 +2,7 @@
 layout: post
 title:  "twitter fortune"
 date:   2014-04-04
-categories: bash
-tags: bash twitter lilb
+categories: [bash,twitter,lilb]
 ---
 
 # Motivation #

@@ -5,13 +5,16 @@ import os
 import yaml
 from collections import defaultdict
 
-def invert_by(ds, key):
+def invert_by(ds, key, sort=True):
     result = defaultdict(list)
     for d in ds:
         vs = d[key] if isinstance(d[key], list) else [d[key]]
         for v in vs:
             result[v].append(d)
-    return result.iteritems()
+    if sort:
+        return sorted(result.iteritems())
+    else:
+        return result.iteritems()
 
 env = Environment(trim_blocks=True)
 
