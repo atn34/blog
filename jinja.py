@@ -17,7 +17,7 @@ env = Environment(trim_blocks=True)
 
 env.filters['invert_by'] = invert_by
 
-def parse_md_file(file_name):
+def parse_metadata(file_name):
     with open(file_name, 'r') as f:
         dddash_count = 0
         yaml_lines = []
@@ -29,14 +29,21 @@ def parse_md_file(file_name):
             elif dddash_count == 2:
                 break
     d = yaml.load(''.join(yaml_lines)) or {}
-    d['link'] = file_name[:-3] + '.html'
+    root, _ = os.path.splitext(file_name)
+    if root.startswith('./'):
+        root = root[len('./'):]
+    d['link'] = root + '.html'
     return d
 
-def get_md_files():
-    os.chdir('content')
-    for root, dirnames, filenames in os.walk('.'):
-        for filename in fnmatch.filter(filenames, '*.md'):
-            yield parse_md_file(os.path.join(root, filename))
+def get_content(glob, directory='.'):
+    for root, dirnames, filenames in os.walk(directory):
+        for filename in fnmatch.filter(filenames, glob):
+            yield parse_metadata(os.path.join(root, filename))
 
 if __name__ == '__main__':
-    print env.from_string(sys.stdin.read()).render(md_files=get_md_files())
+    os.chdir('content')
+    print env.from_string(sys.stdin.read()).render(
+        posts=get_content('*.md', directory='posts'),
+        pages=get_content('*.md*'),
+        production_url='www.atn34.com',
+    )

@@ -1,6 +1,6 @@
 #Posts#
 <ul class="posts">
-{% for post in md_files|sort(attribute='date', reverse=True) %}
+{% for post in posts|sort(attribute='date', reverse=True) %}
 <li><span>{{post.date}}</span> &raquo; <a href="{{post.link}}">{{post.title}}</a></li>
 {% endfor %}
 </ul>

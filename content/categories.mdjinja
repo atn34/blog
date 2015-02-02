@@ -1,5 +1,5 @@
-# Categories:
-{% for category, posts in md_files|invert_by('categories') %}
+# Categories: #
+{% for category, posts in posts|invert_by('categories') %}
 
 ## {{category}} ##
 <ul class="posts">
