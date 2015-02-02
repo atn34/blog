@@ -16,9 +16,19 @@ def invert_by(ds, key, sort=True):
     else:
         return result.iteritems()
 
+def limit(items, count):
+    n = 0
+    while n < count:
+        if hasattr(items, 'next'):
+            yield items.next()
+        else:
+            yield items[n]
+        n += 1
+
 env = Environment(trim_blocks=True)
 
 env.filters['invert_by'] = invert_by
+env.filters['limit'] = limit
 
 def parse_metadata(file_name):
     with open(file_name, 'r') as f:
@@ -41,7 +51,9 @@ def parse_metadata(file_name):
 def get_content(glob, directory='.'):
     for root, dirnames, filenames in os.walk(directory):
         for filename in fnmatch.filter(filenames, glob):
-            yield parse_metadata(os.path.join(root, filename))
+            metadata = parse_metadata(os.path.join(root, filename))
+            if not metadata.get('draft', False):
+                yield metadata
 
 if __name__ == '__main__':
     os.chdir('content')
