@@ -22,4 +22,11 @@ And here is how to use it!
 120
 ```
 
+Here's a bash example.
+
+```bash
+$ echo hello
+hello
+```
+
 That's it!

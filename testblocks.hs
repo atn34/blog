@@ -6,6 +6,11 @@ extractPythonRepl ((CodeBlock (_, "python":_, _) s) : blocks) | ">>>" `isPrefixO
 extractPythonRepl (block : blocks) = extractPythonRepl blocks
 extractPythonRepl [] = []
 
+extractBash ((CodeBlock (_, "bash":_, _) s) : blocks) | "$" `isPrefixOf` s =
+        s : extractBash blocks
+extractBash (block : blocks) = extractBash blocks
+extractBash [] = []
+
 extractPythonCode ((CodeBlock (_, "python":_, _) s) : blocks) | not (">>>" `isPrefixOf` s) =
         s : extractPythonCode blocks
 extractPythonCode (block : blocks) = extractPythonCode blocks
@@ -19,19 +24,28 @@ extractDocTest = formatBlocks . readBlocks . readDoc
     where
         formatBlocks :: [Block] -> String
         formatBlocks blocks =
-            let docstring = concat $ extractPythonRepl blocks in
-            let code = concat $ extractPythonCode blocks in
             unlines [
             "#!/usr/bin/env python",
+            "class Py(object):",
+            "    \"\"\"",
+            concat $ extractPythonRepl blocks,
             "\"\"\"",
-            docstring,
-            "\"\"\"",
+            "    pass",
             "",
-            code,
+            "class Bash(object):",
+            "    \"\"\"",
+            concat $ extractBash blocks,
+            "\"\"\"",
+            "    pass",
+            "",
+            concat $ extractPythonCode blocks,
             "",
             "import doctest",
+            "import shelldoctest",
             "import sys",
-            "sys.exit(doctest.testmod()[0])"
+            "failures = doctest.testmod()[0] or 0",
+            "failures += shelldoctest.testmod()[0] or 0",
+            "sys.exit(failures)"
             ]
 
 main = interact extractDocTest
