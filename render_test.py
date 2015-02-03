@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 import unittest
 import doctest
-import jinja
+
+import render
 
 def load_tests(loader, tests, ignore):
-    tests.addTests(doctest.DocTestSuite(jinja))
+    tests.addTests(doctest.DocTestSuite(render))
     return tests
 
 unittest.main()

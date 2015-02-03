@@ -8,7 +8,7 @@ test/%.py: content/%.md testblocks
 	./testblocks < $< > $@
 	chmod +x $@
 
-test: $(patsubst content/%.md, test/%.py, $(shell find content -name "*.md")) jinja_test.py
+test: $(patsubst content/%.md, test/%.py, $(shell find content -name "*.md")) render_test.py
 	@errors=0; \
 	for test in $^ ; do \
 		echo running $$test; \
@@ -23,13 +23,13 @@ site/%.html: content/%.md default.html
 	mkdir -p $(shell dirname $@)
 	pandoc --template default.html --standalone < $< > $@
 
-site/%.html: content/%.mdjinja $(shell find content -name "*.md") jinja.py default.html
+site/%.html: content/%.mdjinja $(shell find content -name "*.md") render.py default.html
 	mkdir -p $(shell dirname $@)
-	python jinja.py < $< | pandoc --template default.html --standalone > $@
+	python render.py < $< | pandoc --template default.html --standalone > $@
 
-site/%: content/%.jinja $(shell find content -name "*.md") jinja.py
+site/%: content/%.jinja $(shell find content -name "*.md") render.py
 	mkdir -p $(shell dirname $@)
-	python jinja.py < $< > $@
+	python render.py < $< > $@
 
 site/%: content/%
 	mkdir -p $(shell dirname $@)
