@@ -19,11 +19,7 @@ test: $(patsubst content/%.md, test/%.py, $(shell find content -name "*.md")) re
 	exit $$errors
 
 
-site/%.html: content/%.md default.html
-	mkdir -p $(shell dirname $@)
-	pandoc --template default.html --standalone < $< > $@
-
-site/%.html: content/%.mdjinja $(shell find content -name "*.md") render.py default.html
+site/%.html: content/%.md $(shell find content -name "*.md") render.py default.html
 	mkdir -p $(shell dirname $@)
 	python render.py < $< | pandoc --template default.html --standalone > $@
 
@@ -36,7 +32,6 @@ site/%: content/%
 	cp $< $@
 
 site: $(patsubst content/%.md, site/%.html, $(shell find content -name "*.md")) \
-	$(patsubst content/%.mdjinja, site/%.html, $(shell find content -name "*.mdjinja")) \
 	$(patsubst content/%.jinja, site/%, $(shell find content -name "*.jinja")) \
 	$(patsubst content/%, site/%, $(shell find content -type f ! -name "*.md" ! -name "*jinja"))
 
