@@ -25,8 +25,14 @@ And here is how to use it!
 Here's a bash example.
 
 ```bash
-$ echo hello
-hello
+$ python first.py
+hello world!
+```
+
+Here's a python file!
+
+```{{ "python"}}
+{{ "posts/first.py"|include_file }}
 ```
 
 That's it!

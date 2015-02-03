@@ -42,10 +42,15 @@ def limit(items, count):
             break
         n += 1
 
-env = Environment(trim_blocks=True)
+def include_file(file_name):
+    with open(file_name, 'r') as f:
+        return f.read()
+
+env = Environment(trim_blocks=True, lstrip_blocks=True)
 
 env.filters['invert_by'] = invert_by
 env.filters['limit'] = limit
+env.filters['include_file'] = include_file
 
 def parse_metadata(file_name):
     with open(file_name, 'r') as f:

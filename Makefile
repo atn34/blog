@@ -3,17 +3,26 @@
 testblocks: testblocks.hs
 	ghc --make testblocks.hs
 
-test/%.py: content/%.md testblocks
+test/%.out.py: content/%.md testblocks
 	mkdir -p $(shell dirname $@)
 	./testblocks < $< > $@
 	chmod +x $@
 
-test: $(patsubst content/%.md, test/%.py, $(shell find content -name "*.md")) render_test.py
+test/%: content/%
+	mkdir -p $(shell dirname $@)
+	cp $< $@
+
+test: $(patsubst content/%.md, test/%.out.py, $(shell find content -name "*.md")) \
+	$(patsubst content/%, test/%, $(shell find content -type f ! -name "*.md" ! -name "*jinja")) \
+	render_test.py
 	@errors=0; \
+	pwd=$$(pwd); \
 	for test in $^ ; do \
-		echo running $$test; \
-		./$$test || errors=`expr $$errors + 1`; \
-		count=`expr $$count + 1`; \
+		if [ -x $$test ] ; then \
+			echo running $$test; \
+			(cd $$(dirname $$test) && exec $$pwd/$$test) || errors=`expr $$errors + 1`; \
+			count=`expr $$count + 1`; \
+		fi; \
 	done; \
 	echo `expr $$count - $$errors` of $$count tests pass; \
 	exit $$errors
