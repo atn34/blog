@@ -6,21 +6,22 @@
 
 /* Global Reset */
 * {
-  margin: 0;
-  padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 html, body { height: 100%; }
 
 body {
-  background-color: #FFF;
-  font: 13.34px Helvetica, Arial, sans-serif;
-  font-size: small;
-  text-align: center;
+    background-color: #FFF;
+    font: 13.34px Helvetica, Arial, sans-serif;
+    font-size: small;
+    text-align: center;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-size: 100%; }
+    font-size: 100%;
+}
 
 h1 { margin-bottom: 1em; }
 p { margin: 1em 0; }
@@ -35,18 +36,18 @@ a:visited { color: #a0a; }
 /*
 /*****************************************************************************/
 .posts {
-  list-style-type: none;
-  margin-bottom: 2em;
+    list-style-type: none;
+    margin-bottom: 2em;
 }
 
 .posts li {
-  line-height: 1.75em;
+    line-height: 1.75em;
 }
 
 .posts span {
-  color: #aaa;
-  font-family: Monaco, "Courier New", monospace;
-  font-size: 80%;
+    color: #aaa;
+    font-family: Monaco, "Courier New", monospace;
+    font-size: 80%;
 }
 
 /*****************************************************************************/
@@ -56,75 +57,75 @@ a:visited { color: #a0a; }
 /*****************************************************************************/
 
 .site {
-  font-size: 115%;
-  text-align: justify;
-  width: 42em;
-  margin: 3em auto 2em;
-  line-height: 1.5em;
+    font-size: 115%;
+    text-align: justify;
+    width: 42em;
+    margin: 3em auto 2em;
+    line-height: 1.5em;
 }
 
 .header a {
-  font-weight: bold;
-  text-decoration: none;
+    font-weight: bold;
+    text-decoration: none;
 }
 
 .title {
-  display: inline-block;
-  margin-bottom: 2em;
+    display: inline-block;
+    margin-bottom: 2em;
 }
 
 .title a {
-  color: #a00;
+    color: #a00;
 }
 
 .title a:hover {
-  color: #000;
+    color: #000;
 }
 
 .header a.extra {
-  color: #aaa;
-  margin-left: 1em;
+    color: #aaa;
+    margin-left: 1em;
 }
 
 .header a.extra:hover {
-  color: #000;
+    color: #000;
 }
 
 .meta {
-  color: #aaa;
+    color: #aaa;
 }
 
 .footer {
-  font-size: 80%;
-  color: #666;
-  border-top: 4px solid #eee;
-  margin-top: 2em;
-  overflow: hidden;
+    font-size: 80%;
+    color: #666;
+    border-top: 4px solid #eee;
+    margin-top: 2em;
+    overflow: hidden;
 }
 
 .tags-categories {
-  font-size: 90%;
-  color: #666;
-  overflow: hidden;
+    font-size: 90%;
+    color: #666;
+    overflow: hidden;
 }
 
 .footer .contact {
-  float: left;
-  margin-right: 3em;
+    float: left;
+    margin-right: 3em;
 }
 
 .footer .contact a {
-  color: #8085C1;
+    color: #8085C1;
 }
 
 .footer .rss {
-  margin-top: 1.1em;
-  margin-right: -.2em;
-  float: right;
+    margin-top: 1.1em;
+    margin-right: -.2em;
+    float: right;
 }
 
 .footer .rss img {
-  border: 0;
+    border: 0;
 }
 
 /*****************************************************************************/
@@ -135,40 +136,137 @@ a:visited { color: #a0a; }
 
 /* standard */
 .post pre {
-  border: 1px solid #ddd;
-  background-color: #eef;
-  padding: 0 .4em;
+    border: 1px solid #ddd;
+    background-color: #eef;
+    padding: 0 .4em;
 }
 
 .post ul, .post ol {
-  margin-left: 1.35em;
+    margin-left: 1.35em;
 }
 
 .post code {
-  border: 1px solid #ddd;
-  background-color: #eef;
-  padding: 0 .2em;
+    border: 1px solid #ddd;
+    background-color: #eef;
+    padding: 0 .2em;
 }
 
 .post pre code {
-  border: none;
+    border: none;
 }
 
 /* terminal */
 .post pre.terminal {
-  border: 1px solid #000;
-  background-color: #333;
-  color: #FFF;
+    border: 1px solid #000;
+    background-color: #333;
+    color: #FFF;
 }
 
 .post pre.terminal code {
-  background-color: #333;
+    background-color: #333;
+}
+
+
+
+/* ---- Images ---- */
+
+img { vertical-align: middle; }
+
+/* Pandoc figure-style image */
+div.figure {
+    /* Center the image and caption */
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    font-style: italic;
+}
+
+pre {
+    /* Distinguish pre blocks from other text by more than the font with a background tint. */
+    padding: 0.5em; /* Since we have a background color */
+    border-radius: 5px; /* Softens it */
+    /* Give it a some definition */
+    border: 1px solid #aaa;
+    /* Set it off left and right, seems to look a bit nicer when we have a background */
+    margin-top:  0.5em;
+    margin-bottom:  0.5em;
+    margin-left:  0.5em;
+    margin-right: 0.5em;
+}
+
+/* ---- Tables ---- */
+
+/*  A clean textbook-like style with horizontal lines above and below and under 
+the header. Rows highlight on hover to help scanning the table on screen.
+ */
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0; /* IE 6 */
+
+    border-bottom: 2pt solid #000;
+    border-top: 2pt solid #000; /* The caption on top will not have a bottom-border */
+
+    /* Center */
+    margin-left: auto;
+    margin-right: auto;
+}
+/* Entire table header */
+thead {
+    border-bottom: 1pt solid #000;
+    background-color: #eee; /* Does this BG print well? */
+}
+ /* This is for a table caption tag, not the p.caption Pandoc uses in a div.figure */
+caption {
+    caption-side: top;
+    border: none;
+    font-size: 0.9em;
+    font-style: italic;
+    text-align: center;
+    margin-bottom: 0.3em; /* Good for when on top */
+    padding-bottom: 0.2em;
+}
+
+/* ---- Definition lists ---- */
+/* The whole list */
+dl {
+    border-top: 2pt solid black;
+    padding-top: 0.5em;
+    border-bottom: 2pt solid black;
+}
+
+/* Definition term */
+dt {
+    font-weight: bold;
+}
+
+/* 2nd or greater term in the list */
+dd+dt {
+    border-top: 1pt solid black;
+    padding-top: 0.5em;
+}
+
+/* A definition */
+dd {
+    margin-bottom: 0.5em;
+}
+
+/* 2nd or greater definition of a term */
+dd+dd {
+    border-top: 1px solid black; /* To separate multiple definitions */
+}
+
+/* ---- Footnotes ---- */
+
+a.footnote, a.footnoteRef { /* Pandoc, MultiMarkdown footnote links */
+    font-size: small; 
+    vertical-align: text-top;
 }
 
 code.has-jax {font: inherit; font-size: 100%; background: inherit; border: inherit;}
 
 table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
-  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+margin: 0; padding: 0; vertical-align: baseline; border: none; }
 table.sourceCode { width: 100%; line-height: 100%; }
 td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
 td.sourceCode { padding-left: 5px; }
