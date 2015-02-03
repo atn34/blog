@@ -7,31 +7,7 @@
 
         <!-- Custom CSS -->
         <link rel="stylesheet" href="/css/main.css">
-$for(author-meta)$
-  <meta name="author" content="$author-meta$" />
-$endfor$
-$if(date-meta)$
-  <meta name="date" content="$date-meta$" />
-$endif$
-  <title>$if(title-prefix)$$title-prefix$ - $endif$$pagetitle$</title>
-  <style type="text/css">code{white-space: pre;}</style>
-$if(quotes)$
-  <style type="text/css">q { quotes: "“" "”" "‘" "’"; }</style>
-$endif$
-$if(highlighting-css)$
-  <style type="text/css">
-$highlighting-css$
-  </style>
-$endif$
-$for(css)$
-  <link rel="stylesheet" href="$css$" $if(html5)$$else$type="text/css" $endif$/>
-$endfor$
-$if(math)$
-  $math$
-$endif$
-$for(header-includes)$
-  $header-includes$
-$endfor$
+        <title>$if(title-prefix)$$title-prefix$ - $endif$$pagetitle$</title>
     </head>
     <body>
         <div class="site">
@@ -40,11 +16,6 @@ $endfor$
             <a class="extra" href="/">home</a>
             <a class="extra" href="/categories.html">categories</a>
           </div>
-$if(toc)$
-<div id="$idprefix$TOC">
-$toc$
-</div>
-$endif$
 
 $body$
 
