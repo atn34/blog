@@ -1,12 +1,15 @@
 import           Data.List
 import           Text.Pandoc
 
-extractPythonRepl ((CodeBlock (_, "python":_, _) s) : blocks) | ">>>" `isPrefixOf` s =
+checkPrompt prompt classes s =
+    prompt `isPrefixOf` s && not ("notest" `elem` classes)
+
+extractPythonRepl ((CodeBlock (_, classes, _) s) : blocks) | checkPrompt ">>> " classes s =
         s : extractPythonRepl blocks
 extractPythonRepl (block : blocks) = extractPythonRepl blocks
 extractPythonRepl [] = []
 
-extractBash ((CodeBlock (_, "bash":_, _) s) : blocks) | "$" `isPrefixOf` s =
+extractBash ((CodeBlock (_, classes, _) s) : blocks) | checkPrompt "$ " classes s =
         s : extractBash blocks
 extractBash (block : blocks) = extractBash blocks
 extractBash [] = []

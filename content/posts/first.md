@@ -24,15 +24,16 @@ And here is how to use it!
 
 Here's a bash example.
 
-```bash
-$ python first.py
-hello world!
+```{{'python'}}
+# first.py
+{{ "posts/first.py"|include_file }}
 ```
 
-Here's a python file!
-
-```{{ "python"}}
-{{ "posts/first.py"|include_file }}
+```{.terminal}
+$ cat first.py
+print 'hello world!'
+$ python first.py
+hello world!
 ```
 
 That's it!
