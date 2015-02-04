@@ -119,7 +119,7 @@ if __name__ == '__main__':
             metadata=metadata,
             production_url=production_url,
         )
-    if args['--deps']:
+    if args['--firstpass']:
         print body
         sys.exit(0)
     elif args['--deps']:

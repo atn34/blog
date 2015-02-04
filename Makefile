@@ -11,7 +11,7 @@ testblocks: testblocks.hs
 
 test/%.out.py: content/%.md testblocks
 	mkdir -p $(shell dirname $@)
-	./render.py --firstpass < $< | ./testblocks > $@
+	./render.py $< --firstpass | ./testblocks > $@
 	chmod +x $@
 
 test/%: content/%
