@@ -34,7 +34,10 @@ def invert_by(ds, key, sort=True):
     else:
         return result.iteritems()
 
+included_files = []
+
 def include_file(file_name):
+    included_files.append(os.path.join('site', file_name))
     with open(os.path.join('content', file_name), 'r') as f:
         return f.read()
 
@@ -110,27 +113,28 @@ if __name__ == '__main__':
     metadata = parse_metadata(args['<file>'])
     deps = metadata.get('deps', '')
     base_template_name = metadata.get('base', default_template_name(args['<file>']))
-    if args['--deps']:
-        result = 'site/' + metadata['link']
-        result += ' deps/' + result + ': '
-        result += ' '.join(dep['file_name'] for dep in get_content(deps))
-        if base_template_name:
-            result += ' templates/' + base_template_name
-        print result
-        sys.exit(0)
     with open(args['<file>'], 'r') as f:
         body = env.from_string(f.read()).render(
             deps=get_content(deps),
             metadata=metadata,
             production_url=production_url,
         )
-        body = filter_body(args['<file>'])(body)
+    if args['--deps']:
+        result = 'site/' + metadata['link']
+        result += ' deps/' + result + ': '
+        result += ' '.join(dep['file_name'] for dep in get_content(deps))
+        result += ' '.join(included_files)
         if base_template_name:
-            print env.get_template(base_template_name).render(
-                body=body,
-                deps=get_content(deps),
-                metadata=metadata,
-                production_url=production_url,
-            ).encode('utf-8')
-        else:
-            print body
+            result += ' templates/' + base_template_name
+        print result
+        sys.exit(0)
+    body = filter_body(args['<file>'])(body)
+    if base_template_name:
+        print env.get_template(base_template_name).render(
+            body=body,
+            deps=get_content(deps),
+            metadata=metadata,
+            production_url=production_url,
+        ).encode('utf-8')
+    else:
+        print body
