@@ -36,29 +36,29 @@ test: $(patsubst content/%.md, test/%.out.py, $(shell find content -name "*.md")
 
 site/%.html: content/%.md
 	mkdir -p $(shell dirname $@)
-	mkdir -p $(shell dirname deps/$@.d)
-	./render.py $< --deps > deps/$@.d
+	mkdir -p $(shell dirname .deps/$@.d)
+	./render.py $< --deps > .deps/$@.d
 	./render.py $< > $@
 
 site/%.html: content/%.html
 	mkdir -p $(shell dirname $@)
-	mkdir -p $(shell dirname deps/$@.d)
-	./render.py $< --deps > deps/$@.d
+	mkdir -p $(shell dirname .deps/$@.d)
+	./render.py $< --deps > .deps/$@.d
 	./render.py $< > $@
 
 site/%: content/%.jinja
 	mkdir -p $(shell dirname $@)
-	mkdir -p $(shell dirname deps/$@.d)
-	./render.py $< --deps > deps/$@.d
+	mkdir -p $(shell dirname .deps/$@.d)
+	./render.py $< --deps > .deps/$@.d
 	./render.py $< > $@
 
 site/%: content/%
 	mkdir -p $(shell dirname $@)
-	mkdir -p $(shell dirname deps/$@)
-	touch deps/$@.d
+	mkdir -p $(shell dirname .deps/$@)
+	touch .deps/$@.d
 	cp $< $@
 
--include $(patsubst site/%, deps/site/%.d, $(SITE))
+-include $(patsubst site/%, .deps/site/%.d, $(SITE))
 
 site: $(SITE)
 
@@ -69,5 +69,5 @@ watch:
 	done;
 
 clean:
-	rm -rf test site deps
+	rm -rf test site .deps
 	rm -f testblocks *.hi *.o *.pyc

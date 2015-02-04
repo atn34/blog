@@ -124,7 +124,7 @@ if __name__ == '__main__':
         sys.exit(0)
     elif args['--deps']:
         result = 'site/' + metadata['link']
-        result += ' deps/' + result + ': '
+        result += ' .deps/' + result + ': '
         result += ' '.join(dep['file_name'] for dep in get_content(deps))
         result += ' '.join(included_files)
         if base_template_name:
