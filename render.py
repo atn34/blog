@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 usage:
-    render.py <file> [--deps]
+    render.py <file> [--deps|--firstpass]
 """
 from jinja2 import Environment, FileSystemLoader
 import sys
@@ -120,6 +120,9 @@ if __name__ == '__main__':
             production_url=production_url,
         )
     if args['--deps']:
+        print body
+        sys.exit(0)
+    elif args['--deps']:
         result = 'site/' + metadata['link']
         result += ' deps/' + result + ': '
         result += ' '.join(dep['file_name'] for dep in get_content(deps))
