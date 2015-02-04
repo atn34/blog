@@ -1,9 +1,19 @@
-from jinja2 import Environment
-import fnmatch
+#!/usr/bin/env python
+"""
+usage:
+    render.py <file> [--deps]
+"""
+from jinja2 import Environment, FileSystemLoader
 import sys
 import os
 import yaml
 from collections import defaultdict
+from docopt import docopt
+import itertools
+import glob2
+from subprocess import Popen, PIPE
+
+production_url = 'www.atn34.com'
 
 def _test():
     import doctest
@@ -24,33 +34,30 @@ def invert_by(ds, key, sort=True):
     else:
         return result.iteritems()
 
-def limit(items, count):
-    """
-    >>> list(limit(xrange(5), 10))
-    [0, 1, 2, 3, 4]
-    """
-    n = 0
-    while n < count:
-        try:
-            if hasattr(items, 'next'):
-                yield items.next()
-            else:
-                yield items[n]
-        except StopIteration:
-            break
-        except IndexError:
-            break
-        n += 1
-
 def include_file(file_name):
-    with open(file_name, 'r') as f:
+    with open(os.path.join('content', file_name), 'r') as f:
         return f.read()
 
-env = Environment(trim_blocks=True, lstrip_blocks=True)
+env = Environment(
+    loader=FileSystemLoader('templates'),
+    trim_blocks=True,
+    lstrip_blocks=True
+)
 
 env.filters['invert_by'] = invert_by
-env.filters['limit'] = limit
+env.filters['limit'] = itertools.islice
 env.filters['include_file'] = include_file
+
+def strip_metadata(body):
+    dddash_count = 0
+    result = []
+    for line in body.splitlines():
+        if line == '---':
+            dddash_count += 1
+            continue
+        if dddash_count != 1:
+            result.append(line)
+    return '\n'.join(result)
 
 def parse_metadata(file_name):
     with open(file_name, 'r') as f:
@@ -64,23 +71,64 @@ def parse_metadata(file_name):
             elif dddash_count == 2:
                 break
     d = yaml.load(''.join(yaml_lines)) or {}
-    root, _ = os.path.splitext(file_name)
+    root, ext = os.path.splitext(file_name)
     if root.startswith('./'):
         root = root[len('./'):]
-    d['link'] = root + '.html'
+    ext_map = {
+        '.md': '.html',
+        '.jinja': '',
+    }
+    d['link'] = root.replace('content/', '', 1) + ext_map.get(ext, ext)
+    d['file_name'] = file_name
     return d
 
-def get_content(glob, directory='.'):
-    for root, dirnames, filenames in os.walk(directory):
-        for filename in fnmatch.filter(filenames, glob):
-            metadata = parse_metadata(os.path.join(root, filename))
-            if not metadata.get('draft', False):
-                yield metadata
+def get_content(glob):
+    for filename in glob2.glob('content/' + glob):
+        metadata = parse_metadata(filename)
+        if not metadata.get('draft', False):
+            yield metadata
+
+def default_template_name(file_name):
+    _, ext = os.path.splitext(file_name)
+    return {
+        '.md': 'default.html',
+        '.html': 'default.html',
+    }.get(ext)
+
+def filter_body(file_name):
+    _, ext = os.path.splitext(file_name)
+    return {
+        '.md': pandoc,
+    }.get(ext, strip_metadata)
+
+def pandoc(input):
+    p = Popen(['pandoc'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    return p.communicate(input=input)[0].decode('utf-8')
 
 if __name__ == '__main__':
-    os.chdir('content')
-    print env.from_string(sys.stdin.read()).render(
-        posts=get_content('*.md', directory='posts'),
-        pages=get_content('*.md*'),
-        production_url='www.atn34.com',
-    )
+    args = docopt(__doc__)
+    metadata = parse_metadata(args['<file>'])
+    deps = metadata.get('deps', '')
+    base_template_name = metadata.get('base', default_template_name(args['<file>']))
+    if args['--deps']:
+        result = ' '.join(dep['file_name'] for dep in get_content(deps))
+        if base_template_name:
+            result += ' ' + base_template_name
+        print result
+        sys.exit(0)
+    with open(args['<file>'], 'r') as f:
+        body = env.from_string(f.read()).render(
+            deps=get_content(deps),
+            metadata=metadata,
+            production_url=production_url,
+        )
+        body = filter_body(args['<file>'])(body)
+        if base_template_name:
+            print env.get_template(base_template_name).render(
+                body=body,
+                deps=get_content(deps),
+                metadata=metadata,
+                production_url=production_url,
+            ).encode('utf-8')
+        else:
+            print body

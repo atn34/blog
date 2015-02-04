@@ -1,11 +1,11 @@
 ---
-title-prefix: Stuff Andrew Likes
 title: Categories
+deps: "posts/*.md"
 ---
-# Categories: #
-{% for category, posts in posts|invert_by('categories') %}
+<h1>Categories</h1>
+{% for category, posts in deps|invert_by('categories') %}
 
-## {{category}} ##
+<h2>{{category}}</h2> 
 <ul class="posts">
 {% for post in posts|sort(attribute='date', reverse=True) %}
 {% if not post.draft %}

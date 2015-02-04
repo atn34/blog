@@ -7,7 +7,7 @@
 
         <!-- Custom CSS -->
         <link rel="stylesheet" href="/css/main.css">
-        <title>$if(title-prefix)$$title-prefix$ - $endif$$pagetitle$</title>
+        <title>{{title}}</title>
     </head>
     <body>
         <div class="site">
@@ -17,7 +17,7 @@
             <a class="extra" href="/categories.html">categories</a>
           </div>
           <div class="post">
-$body$
+{{body}}
           </div>
           <div class="footer">
             <div class="contact">

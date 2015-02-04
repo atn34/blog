@@ -28,13 +28,17 @@ test: $(patsubst content/%.md, test/%.out.py, $(shell find content -name "*.md")
 	exit $$errors
 
 
-site/%.html: content/%.md $(shell find content -name "*.md") render.py default.html
+site/%.html: content/%.md $(shell find content -name "*.md") render.py
 	mkdir -p $(shell dirname $@)
-	python render.py < $< | pandoc --template default.html --standalone > $@
+	python render.py $< > $@
 
-site/%: content/%.jinja $(shell find content -name "*.md") render.py
+site/%.html: content/%.html $(shell find content -name "*.md") render.py
 	mkdir -p $(shell dirname $@)
-	python render.py < $< > $@
+	python render.py $< > $@
+
+site/%: content/%.jinja
+	mkdir -p $(shell dirname $@)
+	python render.py $< > $@
 
 site/%: content/%
 	mkdir -p $(shell dirname $@)
