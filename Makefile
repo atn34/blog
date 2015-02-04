@@ -1,4 +1,10 @@
-.PHONY: test site serve
+.PHONY: test site serve all
+
+SITE = $(patsubst content/%.md, site/%.html, $(shell find content -name "*.md")) \
+	   $(patsubst content/%.jinja, site/%, $(shell find content -name "*.jinja")) \
+	   $(patsubst content/%, site/%, $(shell find content -type f ! -name "*.md" ! -name "*jinja"))
+
+all: site
 
 testblocks: testblocks.hs
 	ghc --make testblocks.hs
@@ -28,25 +34,33 @@ test: $(patsubst content/%.md, test/%.out.py, $(shell find content -name "*.md")
 	exit $$errors
 
 
-site/%.html: content/%.md $(shell find content -name "*.md") render.py
+site/%.html: content/%.md
 	mkdir -p $(shell dirname $@)
-	python render.py $< > $@
+	mkdir -p $(shell dirname deps/$@.d)
+	./render.py $< --deps > deps/$@.d
+	./render.py $< > $@
 
-site/%.html: content/%.html $(shell find content -name "*.md") render.py
+site/%.html: content/%.html
 	mkdir -p $(shell dirname $@)
-	python render.py $< > $@
+	mkdir -p $(shell dirname deps/$@.d)
+	./render.py $< --deps > deps/$@.d
+	./render.py $< > $@
 
 site/%: content/%.jinja
 	mkdir -p $(shell dirname $@)
-	python render.py $< > $@
+	mkdir -p $(shell dirname deps/$@.d)
+	./render.py $< --deps > deps/$@.d
+	./render.py $< > $@
 
 site/%: content/%
 	mkdir -p $(shell dirname $@)
+	mkdir -p $(shell dirname deps/$@)
+	touch deps/$@.d
 	cp $< $@
 
-site: $(patsubst content/%.md, site/%.html, $(shell find content -name "*.md")) \
-	$(patsubst content/%.jinja, site/%, $(shell find content -name "*.jinja")) \
-	$(patsubst content/%, site/%, $(shell find content -type f ! -name "*.md" ! -name "*jinja"))
+-include $(patsubst site/%, deps/site/%.d, $(SITE))
+
+site: $(SITE)
 
 watch:
 	while true; do \
@@ -55,5 +69,5 @@ watch:
 	done;
 
 clean:
-	rm -rf test site
+	rm -rf test site deps
 	rm -f testblocks *.hi *.o *.pyc

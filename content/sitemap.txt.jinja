@@ -1,3 +1,8 @@
-{% for page in pages %}
+---
+deps: "**/*.*"
+---
+{% for page in deps %}
+{% if not page.draft %}
 {{production_url}}/{{ page.link }}
+{% endif %}
 {% endfor %}

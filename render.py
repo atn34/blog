@@ -83,9 +83,9 @@ def parse_metadata(file_name):
     return d
 
 def get_content(glob):
-    for filename in glob2.glob('content/' + glob):
-        metadata = parse_metadata(filename)
-        if not metadata.get('draft', False):
+    if glob:
+        for filename in glob2.glob('content/' + glob):
+            metadata = parse_metadata(filename)
             yield metadata
 
 def default_template_name(file_name):
@@ -111,9 +111,11 @@ if __name__ == '__main__':
     deps = metadata.get('deps', '')
     base_template_name = metadata.get('base', default_template_name(args['<file>']))
     if args['--deps']:
-        result = ' '.join(dep['file_name'] for dep in get_content(deps))
+        result = 'site/' + metadata['link']
+        result += ' deps/' + result + ': '
+        result += ' '.join(dep['file_name'] for dep in get_content(deps))
         if base_template_name:
-            result += ' ' + base_template_name
+            result += ' templates/' + base_template_name
         print result
         sys.exit(0)
     with open(args['<file>'], 'r') as f:
