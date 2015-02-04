@@ -25,7 +25,6 @@ And here is how to use it!
 Here's a bash example.
 
 ```python
-# first.py
 {{ "posts/first.py"|include_file }}
 ```
 
