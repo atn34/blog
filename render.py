@@ -11,9 +11,10 @@ from collections import defaultdict
 from docopt import docopt
 import itertools
 import glob2
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, check_output
 import hashlib
 import base64
+import tempfile
 
 SITE = {
     'production_url': 'www.atn34.com',
@@ -46,11 +47,20 @@ def include_file(file_name):
     with open(os.path.join('content', file_name), 'r') as f:
         return f.read()
 
-def dot(dot_source, alt_text=''):
-    outname = base64.urlsafe_b64encode(hashlib.sha1(dot_source).digest()) + '.png'
+def dot(source, alt_text=''):
+    outname = base64.urlsafe_b64encode(hashlib.sha1(source).digest()) + '.png'
     with open(os.path.join('site', outname), 'w') as f:
         p = Popen(['dot','-Tpng'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
-        f.write(p.communicate(input=dot_source)[0])
+        f.write(p.communicate(input=source)[0])
+    return '![%s](/%s)' % (alt_text, outname)
+
+def ditaa(source, alt_text=''):
+    outname = base64.urlsafe_b64encode(hashlib.sha1(source).digest()) + '.png'
+    _, tempf = tempfile.mkstemp()
+    with open(tempf, 'w') as f:
+        f.write(source)
+    check_output(['ditaa', tempf, os.path.join('site/', outname), '--overwrite'])
+    os.unlink(tempf)
     return '![%s](/%s)' % (alt_text, outname)
 
 env = Environment(
@@ -61,6 +71,7 @@ env.filters['invert_by'] = invert_by
 env.filters['limit'] = itertools.islice
 env.filters['include_file'] = include_file
 env.filters['dot'] = dot
+env.filters['ditaa'] = ditaa
 
 def strip_metadata(body):
     dddash_count = 0
