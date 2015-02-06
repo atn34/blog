@@ -12,6 +12,8 @@ from docopt import docopt
 import itertools
 import glob2
 from subprocess import Popen, PIPE
+import hashlib
+import base64
 
 SITE = {
     'production_url': 'www.atn34.com',
@@ -44,15 +46,21 @@ def include_file(file_name):
     with open(os.path.join('content', file_name), 'r') as f:
         return f.read()
 
+def dot(dot_source, alt_text=''):
+    outname = base64.urlsafe_b64encode(hashlib.sha1(dot_source).digest()) + '.png'
+    with open(os.path.join('site', outname), 'w') as f:
+        p = Popen(['dot','-Tpng'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        f.write(p.communicate(input=dot_source)[0])
+    return '![%s](/%s)' % (alt_text, outname)
+
 env = Environment(
     loader=FileSystemLoader('templates'),
-    trim_blocks=True,
-    lstrip_blocks=True
 )
 
 env.filters['invert_by'] = invert_by
 env.filters['limit'] = itertools.islice
 env.filters['include_file'] = include_file
+env.filters['dot'] = dot
 
 def strip_metadata(body):
     dddash_count = 0

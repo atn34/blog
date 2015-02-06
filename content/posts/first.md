@@ -35,4 +35,11 @@ $ python first.py
 hello world!
 ```
 
+{% filter dot("Embedded dot diagram!") %}
+digraph {
+    a -> b -> c;
+    a -> c;
+}
+{% endfilter %}
+
 That's it!
