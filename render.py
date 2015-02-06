@@ -13,7 +13,10 @@ import itertools
 import glob2
 from subprocess import Popen, PIPE
 
-production_url = 'www.atn34.com'
+SITE = {
+    'production_url': 'www.atn34.com',
+    'title': 'Stuff Andrew Likes',
+}
 
 def _test():
     import doctest
@@ -117,7 +120,7 @@ if __name__ == '__main__':
         body = env.from_string(f.read()).render(
             deps=get_content(deps),
             metadata=metadata,
-            production_url=production_url,
+            **SITE
         )
     if args['--firstpass']:
         print body
@@ -137,7 +140,7 @@ if __name__ == '__main__':
             body=body,
             deps=get_content(deps),
             metadata=metadata,
-            production_url=production_url,
+            **SITE
         ).encode('utf-8')
     else:
         print body

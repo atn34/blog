@@ -1,0 +1,27 @@
+---
+deps: posts/*.md
+---
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+
+<channel>
+    <title>{{title}}</title>
+    <link>http://{{production_url}}/</link>
+{% if description %}
+    <description>{{description}}</description>
+{% endif %}
+    <language>en</language>
+{% for post in deps|sort(attribute='date', reverse=True) %}
+{% if not post.draft %}
+        <item>
+            <title>{{post.title}}</title>
+            <link>http://{{production_url}}/{{post.link}}</link>
+{% if post.description %}
+            <description>{{post.description}}</description>
+{% endif %}
+        </item>
+{% endif %}
+{% endfor %}
+</channel>
+
+</rss>
