@@ -47,7 +47,7 @@ def include_file(file_name):
     with open(os.path.join('content', file_name), 'r') as f:
         return f.read()
 
-def get_unique_resource(content, ext='.png'):
+def get_unique_resource(content, ext='.svg'):
     outdirectory = os.path.dirname(args['<file>']).replace('content/', 'site/')
     outname = base64.urlsafe_b64encode(hashlib.sha1(content).digest()) + ext
     outpath = os.path.join(outdirectory, outname)
@@ -59,12 +59,12 @@ def inline_img(link, alt_text=''):
 def dot(source, alt_text=''):
     outpath, outlink = get_unique_resource(source)
     with open(outpath, 'w') as f:
-        p = Popen(['dot','-Tpng'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        p = Popen(['dot','-Tsvg'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         f.write(p.communicate(input=source)[0])
     return inline_img(outlink, alt_text)
 
 def ditaa(source, alt_text=''):
-    outpath, outlink = get_unique_resource(source)
+    outpath, outlink = get_unique_resource(source, ext='.png')
     _, tempf = tempfile.mkstemp()
     with open(tempf, 'w') as f:
         f.write(source)
@@ -73,12 +73,13 @@ def ditaa(source, alt_text=''):
     return inline_img(outlink, alt_text)
 
 def plot(source, alt_text=''):
-    outpath, outlink = get_unique_resource(source, ext='.svg')
+    outpath, outlink = get_unique_resource(source)
     _, tempf = tempfile.mkstemp()
     with open(tempf, 'w') as f:
         f.write("""
 import matplotlib.pyplot as plt
 %(source)s
+plt.gcf().set_size_inches(6,6)
 plt.savefig("%(outpath)s")
 """ % vars())
     check_output(['python', tempf])
