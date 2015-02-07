@@ -63,15 +63,6 @@ def dot(source, alt_text=''):
         f.write(p.communicate(input=source)[0])
     return inline_img(outlink, alt_text)
 
-def ditaa(source, alt_text=''):
-    outpath, outlink = get_unique_resource(source, ext='.png')
-    _, tempf = tempfile.mkstemp()
-    with open(tempf, 'w') as f:
-        f.write(source)
-    check_output(['ditaa', tempf, outpath, '--overwrite'])
-    os.unlink(tempf)
-    return inline_img(outlink, alt_text)
-
 def plot(source, alt_text=''):
     outpath, outlink = get_unique_resource(source)
     _, tempf = tempfile.mkstemp()
@@ -94,7 +85,6 @@ env.filters['invert_by'] = invert_by
 env.filters['limit'] = itertools.islice
 env.filters['include_file'] = include_file
 env.filters['dot'] = dot
-env.filters['ditaa'] = ditaa
 env.filters['plot'] = plot
 
 def strip_metadata(body):

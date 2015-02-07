@@ -56,18 +56,6 @@ graph {
 }
 {% endfilter %}
 
-{% filter ditaa("Embedded ditaa diagram!") %}
-    +--------+   +-------+    +-------+
-    |        | --+ ditaa +--> |       |
-    |  Text  |   +-------+    |diagram|
-    |Document|   |!magic!|    |       |
-    |     {d}|   |       |    |       |
-    +----+---+   +-------+    +-------+
-         :                        ^
-         |      Lots of work      |
-         +------------------------+
-{% endfilter %}
-
 {% filter plot("Embedded plot!") %}
 import random
 data = [random.random() for x in xrange(100)]
