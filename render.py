@@ -47,21 +47,30 @@ def include_file(file_name):
     with open(os.path.join('content', file_name), 'r') as f:
         return f.read()
 
+def get_unique_resource(content):
+    outdirectory = os.path.dirname(args['<file>']).replace('content/', 'site/')
+    outname = base64.urlsafe_b64encode(hashlib.sha1(content).digest()) + '.png'
+    outpath = os.path.join(outdirectory, outname)
+    return outpath, outpath.replace('site/', '/')
+
+def inline_img(link, alt_text=''):
+    return '![%s](%s)' % (alt_text, link)
+
 def dot(source, alt_text=''):
-    outname = base64.urlsafe_b64encode(hashlib.sha1(source).digest()) + '.png'
-    with open(os.path.join('site', outname), 'w') as f:
+    outpath, outlink = get_unique_resource(source)
+    with open(outpath, 'w') as f:
         p = Popen(['dot','-Tpng'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         f.write(p.communicate(input=source)[0])
-    return '![%s](/%s)' % (alt_text, outname)
+    return inline_img(outlink, alt_text)
 
 def ditaa(source, alt_text=''):
-    outname = base64.urlsafe_b64encode(hashlib.sha1(source).digest()) + '.png'
+    outpath, outlink = get_unique_resource(source)
     _, tempf = tempfile.mkstemp()
     with open(tempf, 'w') as f:
         f.write(source)
-    check_output(['ditaa', tempf, os.path.join('site/', outname), '--overwrite'])
+    check_output(['ditaa', tempf, outpath, '--overwrite'])
     os.unlink(tempf)
-    return '![%s](/%s)' % (alt_text, outname)
+    return inline_img(outlink, alt_text)
 
 env = Environment(
     loader=FileSystemLoader('templates'),
