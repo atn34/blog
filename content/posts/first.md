@@ -62,10 +62,16 @@ graph {
     |  Text  |   +-------+    |diagram|
     |Document|   |!magic!|    |       |
     |     {d}|   |       |    |       |
-    +---+----+   +-------+    +-------+
-        :                         ^
-        |       Lots of work      |
-        +-------------------------+
+    +----+---+   +-------+    +-------+
+         :                        ^
+         |      Lots of work      |
+         +------------------------+
+{% endfilter %}
+
+{% filter plot("Embedded plot!") %}
+import random
+data = [random.random() for x in xrange(100)]
+plt.plot(data)
 {% endfilter %}
 
 That's it!

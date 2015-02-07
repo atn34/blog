@@ -47,9 +47,9 @@ def include_file(file_name):
     with open(os.path.join('content', file_name), 'r') as f:
         return f.read()
 
-def get_unique_resource(content):
+def get_unique_resource(content, ext='.png'):
     outdirectory = os.path.dirname(args['<file>']).replace('content/', 'site/')
-    outname = base64.urlsafe_b64encode(hashlib.sha1(content).digest()) + '.png'
+    outname = base64.urlsafe_b64encode(hashlib.sha1(content).digest()) + ext
     outpath = os.path.join(outdirectory, outname)
     return outpath, outpath.replace('site/', '/')
 
@@ -72,6 +72,19 @@ def ditaa(source, alt_text=''):
     os.unlink(tempf)
     return inline_img(outlink, alt_text)
 
+def plot(source, alt_text=''):
+    outpath, outlink = get_unique_resource(source, ext='.svg')
+    _, tempf = tempfile.mkstemp()
+    with open(tempf, 'w') as f:
+        f.write("""
+import matplotlib.pyplot as plt
+%(source)s
+plt.savefig("%(outpath)s")
+""" % vars())
+    check_output(['python', tempf])
+    os.unlink(tempf)
+    return inline_img(outlink, alt_text)
+
 env = Environment(
     loader=FileSystemLoader('templates'),
 )
@@ -81,6 +94,7 @@ env.filters['limit'] = itertools.islice
 env.filters['include_file'] = include_file
 env.filters['dot'] = dot
 env.filters['ditaa'] = ditaa
+env.filters['plot'] = plot
 
 def strip_metadata(body):
     dddash_count = 0
