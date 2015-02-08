@@ -1,9 +1,6 @@
 .PHONY: test site serve all
 
-SITE = $(patsubst content/%.md, site/%.html, $(shell find content -name "*.md")) \
-	   $(patsubst content/%.jinja, site/%, $(shell find content -name "*.jinja")) \
-	   $(patsubst content/%, site/%, $(shell find content -type f ! -name "*.md" ! -name "*jinja"))
-
+SITE = $(shell ./render.py --site)
 all: site
 
 test/%.out.py: content/%.md

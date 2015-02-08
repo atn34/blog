@@ -2,6 +2,7 @@
 """
 usage:
     render.py <file> [--deps|--test]
+    render.py --site
 """
 from jinja2 import Environment, FileSystemLoader
 import sys
@@ -148,9 +149,13 @@ def parse_metadata(file_name):
     return d
 
 def get_content(glob):
-    if glob:
-        for filename in glob2.glob('content/' + glob):
-            metadata = parse_metadata(filename)
+    if not glob:
+        return
+    for filename in glob2.glob('content/' + glob):
+        if not os.path.isfile(filename):
+            continue
+        metadata = parse_metadata(filename)
+        if not metadata.get('draft', False):
             yield metadata
 
 def default_template_name(file_name):
@@ -208,6 +213,9 @@ def format_plot():
 
 if __name__ == '__main__':
     args = docopt(__doc__)
+    if args['--site']:
+        print ' '.join('site/' + m['link'] for m in get_content('**/*'))
+        sys.exit(0)
     metadata = parse_metadata(args['<file>'])
     deps = metadata.get('deps', '')
     base_template_name = metadata.get('base', default_template_name(args['<file>']))
