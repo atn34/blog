@@ -1,5 +1,5 @@
 ---
-title:  "cmus album art"
+title:  Cmus Album Art
 date:   2014-04-05
 categories: [bash,cmus,beets,music]
 ---

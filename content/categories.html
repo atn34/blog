@@ -3,9 +3,9 @@ title: Categories
 deps: "posts/*.md"
 ---
 <h1>Categories</h1>
+<div class="tags-categories">
 {% for category, posts in deps|invert_by('categories') %}
-
-<h2>{{category}}</h2> 
+<h2 id="{{category}}">{{category}}</h2>
 <ul class="posts">
 {% for post in posts|sort(attribute='date', reverse=True) %}
 {% if not post.draft %}
@@ -14,3 +14,4 @@ deps: "posts/*.md"
 {% endfor %}
 </ul>
 {% endfor %}
+</div>

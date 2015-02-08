@@ -19,6 +19,14 @@
                 <img src="/rss.gif" width="36" height="14">
             </a>
           </div>
+{% if metadata.categories %}
+    <div class="header">
+        <div class="categories">Categories</div>
+        {% for category in metadata.categories %}
+            <a class="extra" href="/categories.html#{{category}}">{{category}}</a>
+        {% endfor %}
+    </div>
+{% endif %}
           <div class="post">
 {{body}}
           </div>

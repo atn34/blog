@@ -87,6 +87,13 @@ a:visited { color: #a0a; }
     margin-left: 1em;
 }
 
+.header .categories {
+    color: #a00;
+    font-style: italic;
+    margin-bottom: 1em;
+    display: inline-block;
+}
+
 .header a.extra:hover {
     color: #000;
 }

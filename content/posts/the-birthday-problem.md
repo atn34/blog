@@ -1,6 +1,7 @@
 ---
-title: "The Birthday Problem"
+title: The Birthday Problem
 date: 2015-02-07
+categories: [probability]
 ---
 
 # The Birthday Problem #

@@ -1,5 +1,5 @@
 ---
-title:  "git hooks and haskell tags"
+title:  Git Hooks and Haskell Tags
 date:   2014-04-09
 categories: [git,haskell,vim,ctags]
 ---
