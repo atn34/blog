@@ -1,7 +1,7 @@
 ---
 deps: "posts/*.md"
 ---
-<h1>Posts</h1>
+<h1>Recent Posts</h1>
 <ul class="posts">
 {% for post in deps|sort(attribute='date', reverse=True)|limit(20) %}
 {% if not post.draft %}
