@@ -1,0 +1,15 @@
+---
+title: Archive
+deps: "posts/*.md"
+---
+<h1>Archive</h1>
+<div class="tags-categories">
+{% for date, posts in deps|invert_by('yyyy-mm')|sort(reverse=True) %}
+<h2>{{date}}</h2>
+<ul class="posts">
+{% for post in posts|sort(attribute='date', reverse=True) %}
+<li><span>{{post.date}}</span> &raquo; <a href="{{post.link}}">{{post.title}}</a></li>
+{% endfor %}
+</ul>
+{% endfor %}
+</div>

@@ -146,6 +146,8 @@ def parse_metadata(file_name):
     }
     d['link'] = root.replace('content/', '', 1) + ext_map.get(ext, ext)
     d['file_name'] = file_name
+    if 'date' in d:
+        d['yyyy-mm'] = '%s-%s' % (d['date'].year, d['date'].month)
     return d
 
 def get_content(glob):
