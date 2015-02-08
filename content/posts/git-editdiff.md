@@ -1,5 +1,4 @@
 ---
-layout: post
 title:  "git editdiff"
 date:   2014-10-21
 categories: [git,bash,vim]

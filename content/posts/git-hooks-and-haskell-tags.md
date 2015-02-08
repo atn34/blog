@@ -1,5 +1,4 @@
 ---
-layout: post
 title:  "git hooks and haskell tags"
 date:   2014-04-09
 categories: [git,haskell,vim,ctags]

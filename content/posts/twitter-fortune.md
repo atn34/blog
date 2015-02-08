@@ -1,5 +1,4 @@
 ---
-layout: post
 title:  "twitter fortune"
 date:   2014-04-04
 categories: [bash,twitter,lilb]
