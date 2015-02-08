@@ -61,9 +61,10 @@ def inline_img(link, alt_text=''):
 
 def dot(source, alt_text=''):
     outpath, outlink = get_unique_resource(source)
-    with open(outpath, 'w') as f:
-        p = Popen(['dot','-Tsvg'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
-        f.write(p.communicate(input=source)[0])
+    if not args['--test']:
+        with open(outpath, 'w') as f:
+            p = Popen(['dot','-Tsvg'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+            f.write(p.communicate(input=source)[0])
     return inline_img(outlink, alt_text)
 
 plots = []
@@ -195,6 +196,8 @@ sys.exit(failures)
 ''' % ('\n'.join(python_repls), '\n'.join(bash_prompts), '\n'.join(python_codes))
 
 def format_plot():
+    if args['--test']:
+        return
     _, tempf = tempfile.mkstemp()
     with open(tempf, 'w') as f:
         f.write('import matplotlib.pyplot as plt\n')

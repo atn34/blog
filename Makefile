@@ -6,7 +6,7 @@ SITE = $(patsubst content/%.md, site/%.html, $(shell find content -name "*.md"))
 
 all: site
 
-test/%.out.py: content/%.md testblocks
+test/%.out.py: content/%.md
 	mkdir -p $(shell dirname $@)
 	./render.py $< --test > $@
 	chmod +x $@
