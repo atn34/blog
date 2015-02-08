@@ -94,6 +94,10 @@ a:visited { color: #a0a; }
     display: inline-block;
 }
 
+.rss {
+    float: right;
+}
+
 .header a.extra:hover {
     color: #000;
 }
