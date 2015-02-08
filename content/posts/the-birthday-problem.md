@@ -41,7 +41,7 @@ Some examples.
 
 {% filter python_repl %}
 >>> birthday(1)
-0
+0.0
 >>> birthday(2)
 0.0027397260273972603
 >>> birthday(3)
