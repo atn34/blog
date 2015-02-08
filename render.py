@@ -18,7 +18,7 @@ import tempfile
 
 SITE = {
     'production_url': 'www.atn34.com',
-    'title': 'Stuff Andrew Likes',
+    'title': 'Ignorance is Bliss',
 }
 
 def _test():
