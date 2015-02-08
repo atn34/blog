@@ -66,47 +66,36 @@ def dot(source, alt_text=''):
         f.write(p.communicate(input=source)[0])
     return inline_img(outlink, alt_text)
 
+plots = []
 def plot(source, alt_text=''):
     outpath, outlink = get_unique_resource(source)
-    _, tempf = tempfile.mkstemp()
-    with open(tempf, 'w') as f:
-        f.write("""
-import matplotlib.pyplot as plt
-%(source)s
-plt.gcf().set_size_inches(6,6)
-plt.savefig("%(outpath)s")
-""" % vars())
-    check_output(['python', tempf])
-    os.unlink(tempf)
+    plots.append((source, outpath))
     return inline_img(outlink, alt_text)
 
-python_code = []
+python_codes = []
 def python_code(source):
-    global python_code
-    python_code.append(source)
+    global python_codes
+    python_codes.append(source)
     return """
-```python
-%s
+```python%s
 ```
 """ % source
 
-python_repl = []
+python_repls = []
 def python_repl(source):
-    global python_repl
-    python_repl.append(source)
+    global python_repls
+    python_repls.append(source)
     return """
-```python
-%s
+```python%s
 ```
 """ % source
 
-bash_prompt = []
+bash_prompts = []
 def bash_prompt(source):
-    global bash_prompt
-    bash_prompt.append(source)
+    global bash_prompts
+    bash_prompts.append(source)
     return """
-```terminal
-%s
+```terminal%s
 ```
 """ % source
 
@@ -203,7 +192,20 @@ import sys
 failures = doctest.testmod()[0] or 0
 failures += shelldoctest.testmod()[0] or 0
 sys.exit(failures)
-''' % ('\n'.join(python_repl), '\n'.join(bash_prompt), '\n'.join(python_code))
+''' % ('\n'.join(python_repls), '\n'.join(bash_prompts), '\n'.join(python_codes))
+
+def format_plot():
+    _, tempf = tempfile.mkstemp()
+    with open(tempf, 'w') as f:
+        f.write('import matplotlib.pyplot as plt\n')
+        f.write('\n'.join(python_codes) + '\n')
+        for source, path in plots:
+            f.write(source + '\n')
+            f.write('plt.gcf().set_size_inches(6,6)\n')
+            f.write('plt.savefig("%s")\n' % path)
+            f.write('plt.clf()\n')
+    check_output(['python', tempf])
+    os.unlink(tempf)
 
 if __name__ == '__main__':
     args = docopt(__doc__)
@@ -228,6 +230,8 @@ if __name__ == '__main__':
             result += ' templates/' + base_template_name
         print result
         sys.exit(0)
+    if plots:
+        format_plot()
     body = filter_body(args['<file>'])(body)
     if base_template_name:
         print env.get_template(base_template_name).render(
