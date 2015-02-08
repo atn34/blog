@@ -171,20 +171,16 @@ def pandoc(input):
     return p.communicate(input=input)[0].decode('utf-8')
 
 def format_test():
-    '''
-#!/usr/bin/env python
+    return '''#!/usr/bin/env python
 class Py(object):
-    """
-%s
+    """%s
 """
     pass
 
 class Bash(object):
-    """
-%s
+    """%s
 """
     pass
-
 %s
 
 import doctest
