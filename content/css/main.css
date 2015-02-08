@@ -94,8 +94,11 @@ a:visited { color: #a0a; }
     display: inline-block;
 }
 
-.rss {
+.follow {
+    color: #a00;
     float: right;
+    font-style: italic;
+    font-size: 130%;
 }
 
 .header a.extra:hover {
