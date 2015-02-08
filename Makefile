@@ -6,12 +6,9 @@ SITE = $(patsubst content/%.md, site/%.html, $(shell find content -name "*.md"))
 
 all: site
 
-testblocks: testblocks.hs
-	ghc --make testblocks.hs
-
 test/%.out.py: content/%.md testblocks
 	mkdir -p $(shell dirname $@)
-	./render.py $< --firstpass | ./testblocks > $@
+	./render.py $< --test > $@
 	chmod +x $@
 
 test/%: content/%
@@ -69,5 +66,4 @@ watch:
 	done;
 
 clean:
-	rm -rf test site .deps
-	rm -f testblocks *.hi *.o *.pyc
+	rm -rf test site .deps *.pyc

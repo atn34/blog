@@ -6,21 +6,21 @@ categories: [python]
 
 Here is an example of some python code.
 
-```python
+{% filter python_code %}
 def fact(n):
     if n == 0:
         return 1
     return n * fact(n - 1)
-```
+{% endfilter %}
 
 And here is how to use it!
 
-```python
+{% filter python_repl %}
 >>> fact(0)
 1
 >>> fact(5)
 120
-```
+{% endfilter %}
 
 Here's a bash example.
 
@@ -28,12 +28,12 @@ Here's a bash example.
 {{ "posts/first.py"|include_file }}
 ```
 
-```{.terminal}
+{% filter bash_prompt %}
 $ cat first.py
 print 'hello world!'
 $ python first.py
 hello world!
-```
+{% endfilter %}
 
 {% filter dot("Embedded dot diagram!") %}
 graph {

@@ -17,7 +17,7 @@ Linux comes with the [`fortune`](http://linux.die.net/man/6/fortune)
 utility, which serves a similar purpose: when run with no arguments
 it prints a "random, hopefully interesting, adage". For example,
 
-```{.terminal  .notest}
+```terminal
 $ fortune
 You are only young once, but you can stay immature indefinitely.
 ```
@@ -33,13 +33,13 @@ that can request up to 3000 tweets, with a nice webapi.
 
 To use it, first fetch the tweets
 
-```{.terminal .notest}
+```terminal
 $ curl -s http://greptweet.com/f/$TWITTER_HANDLE > /dev/null
 ```
 
 When that's done, you can download the tweets like so
 
-```{.terminal .notest}
+```terminal
 $ curl -s http://greptweet.com/u/lilbthebasedgod/tweets.txt | head -1
 451980332581928960|Fri Apr 04 07:11:23 +0000 2014|Smile for me, I love you - Lil B
 ```
@@ -47,7 +47,7 @@ $ curl -s http://greptweet.com/u/lilbthebasedgod/tweets.txt | head -1
 To use the tweets with fortune,
 we need to format the tweets the way `fortune` wants:
 
-```{.terminal .notest}
+```terminal
 $ curl -s http://greptweet.com/u/$TWITTER_HANDLE/tweets.txt \
     | cut -f3 -d'|' \
     | grep -v '\<RT\>\|\<http\|@' \
@@ -71,7 +71,7 @@ One more complication: before `fortune` can use the file, we need
 to use [`strfile`](http://linux.die.net/man/1/strfile) to allow for
 random access of strings in the file.
 
-```{.terminal .notest}
+```terminal
 $ ./twitter-fortune.sh lilbthebasedgod > fortune-file
 $ strfile fortune-file
 $ fortune fortune-file

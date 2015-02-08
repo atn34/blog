@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 usage:
-    render.py <file> [--deps|--firstpass]
+    render.py <file> [--deps|--test]
 """
 from jinja2 import Environment, FileSystemLoader
 import sys
@@ -80,6 +80,36 @@ plt.savefig("%(outpath)s")
     os.unlink(tempf)
     return inline_img(outlink, alt_text)
 
+python_code = []
+def python_code(source):
+    global python_code
+    python_code.append(source)
+    return """
+```python
+%s
+```
+""" % source
+
+python_repl = []
+def python_repl(source):
+    global python_repl
+    python_repl.append(source)
+    return """
+```python
+%s
+```
+""" % source
+
+bash_prompt = []
+def bash_prompt(source):
+    global bash_prompt
+    bash_prompt.append(source)
+    return """
+```terminal
+%s
+```
+""" % source
+
 env = Environment(
     loader=FileSystemLoader('templates'),
 )
@@ -89,6 +119,9 @@ env.filters['limit'] = itertools.islice
 env.filters['include_file'] = include_file
 env.filters['dot'] = dot
 env.filters['plot'] = plot
+env.filters['python_code'] = python_code
+env.filters['python_repl'] = python_repl
+env.filters['bash_prompt'] = bash_prompt
 
 def strip_metadata(body):
     dddash_count = 0
@@ -147,6 +180,31 @@ def pandoc(input):
     p = Popen(['pandoc'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
     return p.communicate(input=input)[0].decode('utf-8')
 
+def format_test():
+    '''
+#!/usr/bin/env python
+class Py(object):
+    """
+%s
+"""
+    pass
+
+class Bash(object):
+    """
+%s
+"""
+    pass
+
+%s
+
+import doctest
+import shelldoctest
+import sys
+failures = doctest.testmod()[0] or 0
+failures += shelldoctest.testmod()[0] or 0
+sys.exit(failures)
+''' % ('\n'.join(python_repl), '\n'.join(bash_prompt), '\n'.join(python_code))
+
 if __name__ == '__main__':
     args = docopt(__doc__)
     metadata = parse_metadata(args['<file>'])
@@ -158,8 +216,8 @@ if __name__ == '__main__':
             metadata=metadata,
             **SITE
         )
-    if args['--firstpass']:
-        print body
+    if args['--test']:
+        print format_test()
         sys.exit(0)
     elif args['--deps']:
         result = 'site/' + metadata['link']
