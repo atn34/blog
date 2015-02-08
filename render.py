@@ -52,10 +52,10 @@ def include_file(file_name):
         return f.read()
 
 def get_unique_resource(content, ext='.svg'):
-    outdirectory = os.path.dirname(args['<file>']).replace('content/', 'site/')
+    outdirectory = os.path.dirname(args['<file>']).replace('content/', 'site/', 1)
     outname = base64.urlsafe_b64encode(hashlib.sha1(content).digest()) + ext
     outpath = os.path.join(outdirectory, outname)
-    return outpath, outpath.replace('site/', '/')
+    return outpath, outpath.replace('site/', '/', 1)
 
 def inline_img(link, alt_text=''):
     return '![%s](%s)' % (alt_text, link)
