@@ -66,4 +66,4 @@ watch:
 	done;
 
 clean:
-	rm -rf test site .deps *.pyc
+	rm -rf test site/* .deps *.pyc
