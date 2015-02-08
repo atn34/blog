@@ -32,7 +32,10 @@ def invert_by(ds, key, sort=True):
     """
     result = defaultdict(list)
     for d in ds:
-        vs = d[key] if isinstance(d[key], list) else [d[key]]
+        if key in d:
+            vs = d[key] if isinstance(d[key], list) else [d[key]]
+        else:
+            vs = []
         for v in vs:
             result[v].append(d)
     if sort:
