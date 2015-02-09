@@ -60,7 +60,7 @@ def inline_img(link, alt_text=''):
 
 def dot(source, alt_text=''):
     outpath, outlink = get_unique_resource(source)
-    if not args['--test']:
+    if not args['--test'] and not os.path.isfile(outpath):
         with open(outpath, 'w') as f:
             p = Popen(['dot','-Tsvg'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
             f.write(p.communicate(input=source)[0])
@@ -207,13 +207,16 @@ def format_plot():
         return
     _, tempf = tempfile.mkstemp()
     with open(tempf, 'w') as f:
-        f.write('import matplotlib.pyplot as plt\n')
+        f.write('import os\n')
         f.write('\n'.join(python_codes) + '\n')
         for source, path in plots:
-            f.write(source + '\n')
-            f.write('plt.gcf().set_size_inches(6,6)\n')
-            f.write('plt.savefig("%s")\n' % path)
-            f.write('plt.clf()\n')
+            f.write('if not os.path.isfile("%s"):\n' % path)
+            f.write('    import matplotlib.pyplot as plt\n')
+            f.write('\n'.join('    ' + s for s in source.splitlines()))
+            f.write('\n')
+            f.write('    plt.gcf().set_size_inches(6,6)\n')
+            f.write('    plt.savefig("%s")\n' % path)
+            f.write('    plt.clf()\n')
     check_output(['python', tempf])
     os.unlink(tempf)
 
