@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """
 usage:
-    render.py <file> [--deps|--test]
-    render.py --site
+    render.py <file> [--dev] [--deps|--test]
+    render.py --site [--dev]
 """
 from jinja2 import Environment, FileSystemLoader
 import sys
@@ -161,7 +161,7 @@ def get_content(glob):
         if not os.path.isfile(filename):
             continue
         metadata = parse_metadata_from_file(filename)
-        if not metadata.get('draft', False):
+        if args['--dev'] or not metadata.get('draft', False):
             yield metadata
 
 def default_template_name(file_name):

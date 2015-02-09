@@ -31,20 +31,20 @@ test: $(patsubst content/%.md, test/%.out.py, $(shell find content -name "*.md")
 site/%.html: content/%.md
 	mkdir -p $(shell dirname $@)
 	mkdir -p $(shell dirname .deps/$@.d)
-	./render.py $< --deps > .deps/$@.d
-	./render.py $< > $@
+	./render.py $< --deps $(RENDER_FLAGS) > .deps/$@.d
+	./render.py $< $(RENDER_FLAGS) > $@
 
 site/%.html: content/%.html
 	mkdir -p $(shell dirname $@)
 	mkdir -p $(shell dirname .deps/$@.d)
-	./render.py $< --deps > .deps/$@.d
-	./render.py $< > $@
+	./render.py $< --deps $(RENDER_FLAGS) > .deps/$@.d
+	./render.py $< $(RENDER_FLAGS) > $@
 
 site/%: content/%.jinja
 	mkdir -p $(shell dirname $@)
 	mkdir -p $(shell dirname .deps/$@.d)
-	./render.py $< --deps > .deps/$@.d
-	./render.py $< > $@
+	./render.py $< --deps $(RENDER_FLAGS) > .deps/$@.d
+	./render.py $< $(RENDER_FLAGS) > $@
 
 site/%: content/%
 	mkdir -p $(shell dirname $@)

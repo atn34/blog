@@ -12,7 +12,6 @@ deps: posts/*.md
 {% endif %}
     <language>en</language>
 {% for post in deps|sort(attribute='date', reverse=True) %}
-{% if not post.draft %}
         <item>
             <title>{{post.title}}</title>
             <link>http://{{production_url}}/{{post.link}}</link>
@@ -20,7 +19,6 @@ deps: posts/*.md
             <description>{{post.description}}</description>
 {% endif %}
         </item>
-{% endif %}
 {% endfor %}
 </channel>
 
