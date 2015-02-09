@@ -238,15 +238,18 @@ if __name__ == '__main__':
         print format_test()
         sys.exit(0)
     elif args['--deps']:
-        result = 'site/' + metadata['link']
-        result += ' .deps/' + result + ': '
-        result += ' '.join(dep['file_name'] for dep in get_content(deps))
-        result += ' '.join(included_files)
+        result = []
+        result.append('site/' + metadata['link'])
+        result.append('.deps/' + 'site/' + metadata['link'])
+        result.append(':')
+        result.append(__file__)
+        result.extend(dep['file_name'] for dep in get_content(deps))
+        result.extend(included_files)
         if base_template_name:
-            result += ' templates/' + base_template_name
+            result.append('templates/' + base_template_name)
         if args['<file>'].endswith('.md'):
-            result += ' templates/pandoc.txt'
-        print result
+            result.append('templates/pandoc.txt')
+        print ' '.join(result)
         sys.exit(0)
     if plots:
         format_plot()
