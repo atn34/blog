@@ -142,6 +142,25 @@ a:visited { color: #a0a; }
     border: 0;
 }
 
+/*********************************************************************
+ *                         Table of Contents                         *
+ *********************************************************************/
+
+.toc-title {
+    color: #a00;
+    font-style: italic;
+}
+
+.toc a {
+    color: #aaa;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+div.toc {
+    margin-bottom: 2em;
+}
+
 /*****************************************************************************/
 /*
 /* Posts

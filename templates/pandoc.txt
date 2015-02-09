@@ -1,0 +1,8 @@
+$if(toc)$
+<div class="toc" id="$idprefix$TOC">
+<div class="toc-title">Table of Contents</div>
+$toc$
+</div>
+$endif$
+
+$body$

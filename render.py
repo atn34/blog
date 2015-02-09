@@ -125,18 +125,21 @@ def strip_metadata(body):
             result.append(line)
     return '\n'.join(result)
 
-def parse_metadata(file_name):
+def parse_metadata(source):
+    dddash_count = 0
+    yaml_lines = []
+    for line in source.splitlines():
+        if line == '---':
+            dddash_count += 1
+        if dddash_count == 1:
+            yaml_lines.append(line)
+        elif dddash_count == 2:
+            break
+    return yaml.load('\n'.join(yaml_lines)) or {}
+
+def parse_metadata_from_file(file_name):
     with open(file_name, 'r') as f:
-        dddash_count = 0
-        yaml_lines = []
-        for line in f:
-            if line == '---\n':
-                dddash_count += 1
-            if dddash_count == 1:
-                yaml_lines.append(line)
-            elif dddash_count == 2:
-                break
-    d = yaml.load(''.join(yaml_lines)) or {}
+        d = parse_metadata(f.read())
     root, ext = os.path.splitext(file_name)
     if root.startswith('./'):
         root = root[len('./'):]
@@ -156,7 +159,7 @@ def get_content(glob):
     for filename in glob2.glob('content/' + glob):
         if not os.path.isfile(filename):
             continue
-        metadata = parse_metadata(filename)
+        metadata = parse_metadata_from_file(filename)
         if not metadata.get('draft', False):
             yield metadata
 
@@ -173,9 +176,13 @@ def filter_body(file_name):
         '.md': pandoc,
     }.get(ext, strip_metadata)
 
-def pandoc(input):
-    p = Popen(['pandoc'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
-    return p.communicate(input=input)[0].decode('utf-8')
+def pandoc(source):
+    metadata = parse_metadata(source)
+    flags = ['--standalone', '--template=templates/pandoc.txt']
+    if metadata.get('contents', False):
+        flags.append('--toc')
+    p = Popen(['pandoc'] + flags, stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    return p.communicate(input=source)[0].decode('utf-8')
 
 def format_test():
     return '''#!/usr/bin/env python
@@ -218,7 +225,7 @@ if __name__ == '__main__':
     if args['--site']:
         print ' '.join('site/' + m['link'] for m in get_content('**/*'))
         sys.exit(0)
-    metadata = parse_metadata(args['<file>'])
+    metadata = parse_metadata_from_file(args['<file>'])
     deps = metadata.get('deps', '')
     base_template_name = metadata.get('base', default_template_name(args['<file>']))
     with open(args['<file>'], 'r') as f:
@@ -237,6 +244,8 @@ if __name__ == '__main__':
         result += ' '.join(included_files)
         if base_template_name:
             result += ' templates/' + base_template_name
+        if args['<file>'].endswith('.md'):
+            result += ' templates/pandoc.txt'
         print result
         sys.exit(0)
     if plots:
