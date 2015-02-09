@@ -179,7 +179,7 @@ def filter_body(file_name):
 def pandoc(source):
     metadata = parse_metadata(source)
     flags = ['--standalone', '--template=templates/pandoc.txt']
-    if metadata.get('contents', False):
+    if metadata.get('tableofcontents', True):
         flags.append('--toc')
     p = Popen(['pandoc'] + flags, stdout=PIPE, stdin=PIPE, stderr=PIPE)
     return p.communicate(input=source)[0].decode('utf-8')
