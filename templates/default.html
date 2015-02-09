@@ -26,9 +26,9 @@
         {% endfor %}
     </div>
 {% endif %}
-          <div class="post">
+{% if metadata.post %}<div class="post">{% endif %}
 {{body}}
-          </div>
+{% if metadata.post %}</div>{% endif %}
           <div class="footer">
             <div class="contact">
               <p>

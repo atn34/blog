@@ -149,6 +149,7 @@ def parse_metadata_from_file(file_name):
     }
     d['link'] = root.replace('content/', '', 1) + ext_map.get(ext, ext)
     d['file_name'] = file_name
+    d['post'] = file_name.startswith('content/posts/')
     if 'date' in d:
         d['yyyy-mm'] = '%s-%s' % (d['date'].year, d['date'].month)
     return d
