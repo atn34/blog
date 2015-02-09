@@ -4,10 +4,8 @@ usage:
     render.py <file> [--dev] [--deps|--test]
     render.py --site [--dev]
 """
-from jinja2 import Environment, FileSystemLoader
 import sys
 import os
-import yaml
 from collections import defaultdict
 from docopt import docopt
 import itertools
@@ -101,19 +99,6 @@ def bash_prompt(source):
 ```
 """ % source
 
-env = Environment(
-    loader=FileSystemLoader('templates'),
-)
-
-env.filters['invert_by'] = invert_by
-env.filters['limit'] = itertools.islice
-env.filters['include_file'] = include_file
-env.filters['dot'] = dot
-env.filters['plot'] = plot
-env.filters['python_code'] = python_code
-env.filters['python_repl'] = python_repl
-env.filters['bash_prompt'] = bash_prompt
-
 def strip_metadata(body):
     dddash_count = 0
     result = []
@@ -125,21 +110,32 @@ def strip_metadata(body):
             result.append(line)
     return '\n'.join(result)
 
-def parse_metadata(source):
+def parse_metadata(lines):
+    """
+    >>> parse_metadata(['---', 'x: 1', 'y: 2', '---'])
+    {'y': 2, 'x': 1}
+    >>> parse_metadata(['---', 'x: 1\\n', 'y: 2\\n', '---'])
+    {'y': 2, 'x': 1}
+    >>> parse_metadata(['---', 'x: 1', 'y: 2', '---', 'slkjd'])
+    {'y': 2, 'x': 1}
+    """
     dddash_count = 0
     yaml_lines = []
-    for line in source.splitlines():
+    for line in lines:
+        if line.endswith('\n'):
+            line = line[:-1]
         if line == '---':
             dddash_count += 1
         if dddash_count == 1:
             yaml_lines.append(line)
         elif dddash_count == 2:
             break
+    import yaml
     return yaml.load('\n'.join(yaml_lines)) or {}
 
 def parse_metadata_from_file(file_name):
     with open(file_name, 'r') as f:
-        d = parse_metadata(f.read())
+        d = parse_metadata(f)
     root, ext = os.path.splitext(file_name)
     if root.startswith('./'):
         root = root[len('./'):]
@@ -178,7 +174,7 @@ def filter_body(file_name):
     }.get(ext, strip_metadata)
 
 def pandoc(source):
-    metadata = parse_metadata(source)
+    metadata = parse_metadata(source.splitlines())
     flags = ['--standalone', '--template=templates/pandoc.txt']
     if metadata.get('tableofcontents', True):
         flags.append('--toc')
@@ -221,6 +217,21 @@ def format_plot():
     check_output(['python', tempf])
     os.unlink(tempf)
 
+def load_jinja():
+    import jinja2
+    env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader('templates'),
+    )
+    env.filters['invert_by'] = invert_by
+    env.filters['limit'] = itertools.islice
+    env.filters['include_file'] = include_file
+    env.filters['dot'] = dot
+    env.filters['plot'] = plot
+    env.filters['python_code'] = python_code
+    env.filters['python_repl'] = python_repl
+    env.filters['bash_prompt'] = bash_prompt
+    return env
+
 if __name__ == '__main__':
     args = docopt(__doc__)
     if args['--site']:
@@ -229,6 +240,7 @@ if __name__ == '__main__':
     metadata = parse_metadata_from_file(args['<file>'])
     deps = metadata.get('deps', '')
     base_template_name = metadata.get('base', default_template_name(args['<file>']))
+    env = load_jinja()
     with open(args['<file>'], 'r') as f:
         body = env.from_string(f.read()).render(
             deps=get_content(deps),
