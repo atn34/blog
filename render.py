@@ -151,7 +151,7 @@ def parse_metadata_from_file(file_name):
     d['file_name'] = file_name
     d['post'] = file_name.startswith('content/posts/')
     if 'date' in d:
-        d['yyyy-mm'] = '%s-%s' % (d['date'].year, d['date'].month)
+        d['yyyy-mm'] = '-'.join(str(d['date']).split('-')[:2])
     return d
 
 def get_content(glob):
