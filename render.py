@@ -281,11 +281,13 @@ if __name__ == "__main__":
         for f in args['<file>']:
             if not os.path.isfile(f):
                 continue
-            if not any(f.endswith(ext) for ext in ('.md', '.html', '.jinja')):
+            if not any(f.endswith(ext) for ext in APPLY_JINJA):
+                print 'copying ' + f
                 outpath = f.replace('content/', 'site/', 1)
                 if not os.path.exists(os.path.dirname(outpath)):
                     os.makedirs(os.path.dirname(outpath))
                 shutil.copy(f, outpath)
                 continue
+            print 'rendering ' + f
             file_render = FileRender(f)
             file_render.render_to_file()
