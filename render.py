@@ -1,23 +1,27 @@
 #!/usr/bin/env python
 """
 usage:
-    render.py [--dev] <source_dir> <dest_dir>
-    render.py --test <file>
+    render.py build [--dev] <source_dir> <dest_dir>
+    render.py test <file>
+    render.py serve [--dev] <source_dir> <dest_dir>
 """
 
 from collections import defaultdict
 from docopt import docopt
 from subprocess import Popen, PIPE, check_output
 
+import bottle
 import base64
 import glob2
 import hashlib
 import itertools
 import jinja2
 import os
+import pyinotify
 import shutil
 import sys
 import tempfile
+import threading
 import yaml
 
 def pandoc(source):
@@ -111,7 +115,7 @@ class FileRender(object):
 
     def dot(self, source, alt_text=''):
         outpath, outlink = self.get_unique_resource(source)
-        if not args['--test'] and not os.path.isfile(outpath):
+        if not args['test'] and not os.path.isfile(outpath):
             if not os.path.exists(os.path.dirname(outpath)):
                 os.makedirs(os.path.dirname(outpath))
             with open(outpath, 'w') as f:
@@ -261,7 +265,7 @@ def get_content(glob):
         if not os.path.isfile(filename):
             continue
         metadata = parse_metadata_from_file(filename)
-        if args['--test'] or args['--dev'] or not metadata.get('draft', False):
+        if args['test'] or args['--dev'] or not metadata.get('draft', False):
             yield metadata
 
 def default_template_name(file_name):
@@ -275,12 +279,44 @@ def filter_body(file_name):
     _, ext = os.path.splitext(file_name)
     return FILTER_BODY.get(ext, strip_metadata)
 
+def build():
+    for metadata in get_content('**'):
+        f = metadata['file_name']
+        if not os.path.isfile(f):
+            continue
+        if not any(f.endswith(ext) for ext in APPLY_JINJA):
+            print 'copying ' + f
+            outpath = f.replace(args['<source_dir>'], args['<dest_dir>'], 1)
+            if not os.path.exists(os.path.dirname(outpath)):
+                os.makedirs(os.path.dirname(outpath))
+            shutil.copy(f, outpath)
+            continue
+        print 'rendering ' + f
+        file_render = FileRender(f)
+        file_render.render_to_file()
+    print 'done.'
+
+@bottle.route('<path:path>')
+def serve_path(path):
+    return bottle.static_file(path, args['<dest_dir>'])
+
+@bottle.route('/')
+def serve_root():
+    return serve_path('/index.html')
+
+def serve():
+    bottle.run(host='localhost', port=8000)
+
+class OnWriteHandler(pyinotify.ProcessEvent):
+    def process_IN_MODIFY(self, event):
+        build()
+
 if __name__ == "__main__":
     args = docopt(__doc__)
-    if args['--test']:
+    if args['test']:
         file_render = FileRender(args['<file>'][0])
         print file_render.format_test()
-    else:
+    elif args['build'] or args['serve']:
         if not os.path.isdir(args['<source_dir>']):
             print args['<source_dir>'] + ' is not a dir'
             sys.exit(1)
@@ -291,17 +327,13 @@ if __name__ == "__main__":
             args['<source_dir>'] += '/'
         if not args['<dest_dir>'].endswith('/'):
             args['<dest_dir>'] += '/'
-        for metadata in get_content('**'):
-            f = metadata['file_name']
-            if not os.path.isfile(f):
-                continue
-            if not any(f.endswith(ext) for ext in APPLY_JINJA):
-                print 'copying ' + f
-                outpath = f.replace(args['<source_dir>'], args['<dest_dir>'], 1)
-                if not os.path.exists(os.path.dirname(outpath)):
-                    os.makedirs(os.path.dirname(outpath))
-                shutil.copy(f, outpath)
-                continue
-            print 'rendering ' + f
-            file_render = FileRender(f)
-            file_render.render_to_file()
+        build()
+    if args['serve']:
+        wm = pyinotify.WatchManager()
+        handler = OnWriteHandler()
+        notifier = pyinotify.Notifier(wm, default_proc_fun=handler)
+        wm.add_watch(args['<source_dir>'], pyinotify.ALL_EVENTS, rec=True)
+        t = threading.Thread(target=serve)
+        t.daemon = True
+        t.start()
+        notifier.loop()

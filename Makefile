@@ -4,7 +4,7 @@ all: site
 
 test/%.out.py: content/%.md
 	mkdir -p $(shell dirname $@)
-	./render.py --test $< > $@
+	./render.py test $< > $@
 	chmod +x $@
 
 test/%: content/%
