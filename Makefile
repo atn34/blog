@@ -28,13 +28,15 @@ test: $(patsubst content/%.md, test/%.out.py, $(shell find content -name "*.md")
 
 
 site:
+	mkdir -p site
 	./render.py content site
 
 watch:
 	while true; do \
-		make site; \
+		./render.py --dev content site; \
+		echo done; \
 		inotifywait -qre close_write .; \
 	done;
 
 clean:
-	rm -rf test site/* .deps *.pyc
+	rm -rf test site/* *.pyc
