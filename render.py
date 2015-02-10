@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 """
 usage:
-    render.py [--dev] <file>...
+    render.py [--dev] <source_dir> <dest_dir>
     render.py --test <file>
 """
+import sys
 import os
 from collections import defaultdict
 from docopt import docopt
@@ -65,7 +66,7 @@ def invert_by(ds, key, sort=True):
 included_files = []
 
 def include_file(file_name):
-    included_files.append(os.path.join('site', file_name))
+    included_files.append(os.path.join(args['<dest_dir>'], file_name))
     with open(os.path.join('content', file_name), 'r') as f:
         return f.read()
 
@@ -101,10 +102,10 @@ class FileRender(object):
         self.metadata = parse_metadata_from_file(self.file_name)
 
     def get_unique_resource(self, content, ext='.svg'):
-        outdirectory = os.path.dirname(self.file_name).replace('content/', 'site/', 1)
+        outdirectory = os.path.dirname(self.file_name).replace(args['<source_dir>'], args['<dest_dir>'], 1)
         outname = base64.urlsafe_b64encode(hashlib.sha1(content).digest()) + ext
         outpath = os.path.join(outdirectory, outname)
-        return outpath, outpath.replace('site/', '/', 1)
+        return outpath, outpath.replace(args['<dest_dir>'], '/', 1)
 
     def dot(self, source, alt_text=''):
         outpath, outlink = self.get_unique_resource(source)
@@ -199,7 +200,7 @@ sys.exit(failures)
         return body
 
     def render_to_file(self):
-        outpath = os.path.join('site', self.metadata['link'])
+        outpath = os.path.join(args['<dest_dir>'], self.metadata['link'])
         if not os.path.exists(os.path.dirname(outpath)):
             os.makedirs(os.path.dirname(outpath))
         with open(outpath, 'w') as f:
@@ -244,7 +245,7 @@ def parse_metadata_from_file(file_name):
     root, ext = os.path.splitext(file_name)
     if root.startswith('./'):
         root = root[len('./'):]
-    d['link'] = root.replace('content/', '', 1) + APPLY_JINJA.get(ext, ext)
+    d['link'] = root.replace(args['<source_dir>'], '', 1) + APPLY_JINJA.get(ext, ext)
     d['file_name'] = file_name
     d['post'] = file_name.startswith('content/posts/')
     if 'date' in d:
@@ -254,7 +255,7 @@ def parse_metadata_from_file(file_name):
 def get_content(glob):
     if not glob:
         return
-    for filename in glob2.glob('content/' + glob):
+    for filename in glob2.glob(args['<source_dir>'] + glob):
         if not os.path.isfile(filename):
             continue
         metadata = parse_metadata_from_file(filename)
@@ -278,12 +279,22 @@ if __name__ == "__main__":
         file_render = FileRender(args['<file>'][0])
         print file_render.format_test()
     else:
-        for f in args['<file>']:
+        if not os.path.isdir(args['<source_dir>']):
+            print args['<source_dir>'] + ' is not a dir'
+            sys.exit(1)
+        if not os.path.isdir(args['<dest_dir>']):
+            print args['<dest_dir>'] + ' is not a dir'
+            sys.exit(1)
+        if not args['<source_dir>'].endswith('/'):
+            args['<source_dir>'] += '/'
+        if not args['<dest_dir>'].endswith('/'):
+            args['<dest_dir>'] += '/'
+        for f in glob2.glob(os.path.join(args['<source_dir>'], '**')):
             if not os.path.isfile(f):
                 continue
             if not any(f.endswith(ext) for ext in APPLY_JINJA):
                 print 'copying ' + f
-                outpath = f.replace('content/', 'site/', 1)
+                outpath = f.replace(args['<source_dir>'], args['<dest_dir>'], 1)
                 if not os.path.exists(os.path.dirname(outpath)):
                     os.makedirs(os.path.dirname(outpath))
                 shutil.copy(f, outpath)

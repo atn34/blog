@@ -28,7 +28,7 @@ test: $(patsubst content/%.md, test/%.out.py, $(shell find content -name "*.md")
 
 
 site:
-	./render.py $(shell find content)
+	./render.py content site
 
 watch:
 	while true; do \
