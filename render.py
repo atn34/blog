@@ -17,9 +17,27 @@ import jinja2
 import yaml
 import shutil
 
+def pandoc(source):
+    metadata = parse_metadata(source.splitlines())
+    flags = ['--standalone', '--template=templates/pandoc.txt']
+    if metadata.get('tableofcontents', True):
+        flags.append('--toc')
+    p = Popen(['pandoc'] + flags, stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    return p.communicate(input=source)[0].decode('utf-8')
+
 SITE = {
     'production_url': 'www.atn34.com',
     'title': 'Ignorance is Bliss',
+}
+
+APPLY_JINJA = {
+    '.md': '.html',
+    '.jinja': '',
+    '.html': '.html',
+}
+
+FILTER_BODY = {
+    '.md': pandoc,
 }
 
 def _test():
@@ -226,11 +244,7 @@ def parse_metadata_from_file(file_name):
     root, ext = os.path.splitext(file_name)
     if root.startswith('./'):
         root = root[len('./'):]
-    ext_map = {
-        '.md': '.html',
-        '.jinja': '',
-    }
-    d['link'] = root.replace('content/', '', 1) + ext_map.get(ext, ext)
+    d['link'] = root.replace('content/', '', 1) + APPLY_JINJA.get(ext, ext)
     d['file_name'] = file_name
     d['post'] = file_name.startswith('content/posts/')
     if 'date' in d:
@@ -256,18 +270,7 @@ def default_template_name(file_name):
 
 def filter_body(file_name):
     _, ext = os.path.splitext(file_name)
-    return {
-        '.md': pandoc,
-    }.get(ext, strip_metadata)
-
-def pandoc(source):
-    metadata = parse_metadata(source.splitlines())
-    flags = ['--standalone', '--template=templates/pandoc.txt']
-    if metadata.get('tableofcontents', True):
-        flags.append('--toc')
-    p = Popen(['pandoc'] + flags, stdout=PIPE, stdin=PIPE, stderr=PIPE)
-    return p.communicate(input=source)[0].decode('utf-8')
-
+    return FILTER_BODY.get(ext, strip_metadata)
 
 if __name__ == "__main__":
     args = docopt(__doc__)
