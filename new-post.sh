@@ -21,6 +21,7 @@ cat > "$OUTFILE" << EOF
 title:  $TITLE
 date:   $DATE
 categories: []
+draft: true
 ---
 
 EOF

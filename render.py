@@ -291,7 +291,8 @@ if __name__ == "__main__":
             args['<source_dir>'] += '/'
         if not args['<dest_dir>'].endswith('/'):
             args['<dest_dir>'] += '/'
-        for f in glob2.glob(os.path.join(args['<source_dir>'], '**')):
+        for metadata in get_content('**'):
+            f = metadata['file_name']
             if not os.path.isfile(f):
                 continue
             if not any(f.endswith(ext) for ext in APPLY_JINJA):
