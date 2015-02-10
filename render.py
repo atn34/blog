@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 """
 usage:
-    render.py <file> [--dev] [--deps|--test]
-    render.py --site [--dev]
+    render.py [--dev] <file>...
+    render.py --test <file>
 """
-import sys
 import os
 from collections import defaultdict
 from docopt import docopt
@@ -14,6 +13,9 @@ from subprocess import Popen, PIPE, check_output
 import hashlib
 import base64
 import tempfile
+import jinja2
+import yaml
+import shutil
 
 SITE = {
     'production_url': 'www.atn34.com',
@@ -49,55 +51,141 @@ def include_file(file_name):
     with open(os.path.join('content', file_name), 'r') as f:
         return f.read()
 
-def get_unique_resource(content, ext='.svg'):
-    outdirectory = os.path.dirname(args['<file>']).replace('content/', 'site/', 1)
-    outname = base64.urlsafe_b64encode(hashlib.sha1(content).digest()) + ext
-    outpath = os.path.join(outdirectory, outname)
-    return outpath, outpath.replace('site/', '/', 1)
-
 def inline_img(link, alt_text=''):
     return '![%s](%s)' % (alt_text, link)
 
-def dot(source, alt_text=''):
-    outpath, outlink = get_unique_resource(source)
-    if not args['--test'] and not os.path.isfile(outpath):
+def codeblock(source, css_class=''):
+    return """
+```%s%s
+```
+""" % (css_class, source)
+
+class FileRender(object):
+
+    def __init__(self, file_name):
+        self.file_name = file_name
+        self.plots = []
+        self.python_codes = []
+        self.python_repls = []
+        self.bash_prompts = []
+        env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader('templates'),
+        )
+        env.filters['invert_by'] = invert_by
+        env.filters['limit'] = itertools.islice
+        env.filters['include_file'] = include_file
+        env.filters['dot'] = self.dot
+        env.filters['plot'] = self.plot
+        env.filters['python_code'] = self.python_code
+        env.filters['python_repl'] = self.python_repl
+        env.filters['bash_prompt'] = self.bash_prompt
+        self.env = env
+        self.metadata = parse_metadata_from_file(self.file_name)
+
+    def get_unique_resource(self, content, ext='.svg'):
+        outdirectory = os.path.dirname(self.file_name).replace('content/', 'site/', 1)
+        outname = base64.urlsafe_b64encode(hashlib.sha1(content).digest()) + ext
+        outpath = os.path.join(outdirectory, outname)
+        return outpath, outpath.replace('site/', '/', 1)
+
+    def dot(self, source, alt_text=''):
+        outpath, outlink = self.get_unique_resource(source)
+        if not args['--test'] and not os.path.isfile(outpath):
+            if not os.path.exists(os.path.dirname(outpath)):
+                os.makedirs(os.path.dirname(outpath))
+            with open(outpath, 'w') as f:
+                p = Popen(['dot','-Tsvg'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+                f.write(p.communicate(input=source)[0])
+        return inline_img(outlink, alt_text)
+
+    def plot(self, source, alt_text=''):
+        outpath, outlink = self.get_unique_resource(source)
+        self.plots.append((source, outpath))
+        return inline_img(outlink, alt_text)
+
+    def python_code(self, source):
+        self.python_codes.append(source)
+        return codeblock(source, 'python')
+
+    def python_repl(self, source):
+        self.python_repls.append(source)
+        return codeblock(source, 'python')
+
+    def format_test(self):
+        deps = self.metadata.get('deps', '')
+        with open(self.file_name, 'r') as f:
+            self.env.from_string(f.read()).render(
+                deps=get_content(deps),
+                metadata=self.metadata,
+                **SITE
+            )
+        return '''#!/usr/bin/env python
+class Py(object):
+    """%s
+"""
+    pass
+
+class Bash(object):
+    """%s
+"""
+    pass
+%s
+
+import doctest
+import shelldoctest
+import sys
+failures = doctest.testmod()[0] or 0
+failures += shelldoctest.testmod()[0] or 0
+sys.exit(failures)
+''' % ('\n'.join(self.python_repls), '\n'.join(self.bash_prompts), '\n'.join(self.python_codes))
+
+    def bash_prompt(self, source):
+        self.bash_prompts.append(source)
+        return codeblock(source, 'terminal')
+
+    def format_plot(self):
+        _, tempf = tempfile.mkstemp()
+        with open(tempf, 'w') as f:
+            f.write('import os\n')
+            f.write('\n'.join(self.python_codes) + '\n')
+            for source, path in self.plots:
+                f.write('if not os.path.isfile("%s"):\n' % path)
+                f.write('    import matplotlib.pyplot as plt\n')
+                f.write('\n'.join('    ' + s for s in source.splitlines()))
+                f.write('\n')
+                f.write('    plt.gcf().set_size_inches(6,6)\n')
+                f.write('    plt.savefig("%s")\n' % path)
+                f.write('    plt.clf()\n')
+        check_output(['python', tempf])
+        os.unlink(tempf)
+
+    def render(self):
+        deps = self.metadata.get('deps', '')
+        base_template_name = self.metadata.get('base', default_template_name(self.file_name))
+        with open(self.file_name, 'r') as f:
+            body = self.env.from_string(f.read()).render(
+                deps=get_content(deps),
+                metadata=self.metadata,
+                **SITE
+            )
+        body = filter_body(self.file_name)(body)
+        if self.plots:
+            self.format_plot()
+        if base_template_name:
+            return self.env.get_template(base_template_name).render(
+                body=body,
+                deps=get_content(deps),
+                metadata=self.metadata,
+                **SITE
+            ).encode('utf-8')
+        return body
+
+    def render_to_file(self):
+        outpath = os.path.join('site', self.metadata['link'])
+        if not os.path.exists(os.path.dirname(outpath)):
+            os.makedirs(os.path.dirname(outpath))
         with open(outpath, 'w') as f:
-            p = Popen(['dot','-Tsvg'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
-            f.write(p.communicate(input=source)[0])
-    return inline_img(outlink, alt_text)
-
-plots = []
-def plot(source, alt_text=''):
-    outpath, outlink = get_unique_resource(source)
-    plots.append((source, outpath))
-    return inline_img(outlink, alt_text)
-
-python_codes = []
-def python_code(source):
-    global python_codes
-    python_codes.append(source)
-    return """
-```python%s
-```
-""" % source
-
-python_repls = []
-def python_repl(source):
-    global python_repls
-    python_repls.append(source)
-    return """
-```python%s
-```
-""" % source
-
-bash_prompts = []
-def bash_prompt(source):
-    global bash_prompts
-    bash_prompts.append(source)
-    return """
-```terminal%s
-```
-""" % source
+            f.write(self.render())
 
 def strip_metadata(body):
     dddash_count = 0
@@ -130,7 +218,6 @@ def parse_metadata(lines):
             yaml_lines.append(line)
         elif dddash_count == 2:
             break
-    import yaml
     return yaml.load('\n'.join(yaml_lines)) or {}
 
 def parse_metadata_from_file(file_name):
@@ -157,7 +244,7 @@ def get_content(glob):
         if not os.path.isfile(filename):
             continue
         metadata = parse_metadata_from_file(filename)
-        if args['--dev'] or not metadata.get('draft', False):
+        if args['--test'] or args['--dev'] or not metadata.get('draft', False):
             yield metadata
 
 def default_template_name(file_name):
@@ -181,101 +268,21 @@ def pandoc(source):
     p = Popen(['pandoc'] + flags, stdout=PIPE, stdin=PIPE, stderr=PIPE)
     return p.communicate(input=source)[0].decode('utf-8')
 
-def format_test():
-    return '''#!/usr/bin/env python
-class Py(object):
-    """%s
-"""
-    pass
 
-class Bash(object):
-    """%s
-"""
-    pass
-%s
-
-import doctest
-import shelldoctest
-import sys
-failures = doctest.testmod()[0] or 0
-failures += shelldoctest.testmod()[0] or 0
-sys.exit(failures)
-''' % ('\n'.join(python_repls), '\n'.join(bash_prompts), '\n'.join(python_codes))
-
-def format_plot():
-    if args['--test']:
-        return
-    _, tempf = tempfile.mkstemp()
-    with open(tempf, 'w') as f:
-        f.write('import os\n')
-        f.write('\n'.join(python_codes) + '\n')
-        for source, path in plots:
-            f.write('if not os.path.isfile("%s"):\n' % path)
-            f.write('    import matplotlib.pyplot as plt\n')
-            f.write('\n'.join('    ' + s for s in source.splitlines()))
-            f.write('\n')
-            f.write('    plt.gcf().set_size_inches(6,6)\n')
-            f.write('    plt.savefig("%s")\n' % path)
-            f.write('    plt.clf()\n')
-    check_output(['python', tempf])
-    os.unlink(tempf)
-
-def load_jinja():
-    import jinja2
-    env = jinja2.Environment(
-        loader=jinja2.FileSystemLoader('templates'),
-    )
-    env.filters['invert_by'] = invert_by
-    env.filters['limit'] = itertools.islice
-    env.filters['include_file'] = include_file
-    env.filters['dot'] = dot
-    env.filters['plot'] = plot
-    env.filters['python_code'] = python_code
-    env.filters['python_repl'] = python_repl
-    env.filters['bash_prompt'] = bash_prompt
-    return env
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     args = docopt(__doc__)
-    if args['--site']:
-        print ' '.join('site/' + m['link'] for m in get_content('**/*'))
-        sys.exit(0)
-    metadata = parse_metadata_from_file(args['<file>'])
-    deps = metadata.get('deps', '')
-    base_template_name = metadata.get('base', default_template_name(args['<file>']))
-    env = load_jinja()
-    with open(args['<file>'], 'r') as f:
-        body = env.from_string(f.read()).render(
-            deps=get_content(deps),
-            metadata=metadata,
-            **SITE
-        )
     if args['--test']:
-        print format_test()
-        sys.exit(0)
-    elif args['--deps']:
-        result = []
-        result.append('site/' + metadata['link'])
-        result.append('.deps/' + 'site/' + metadata['link'])
-        result.append(':')
-        result.append(__file__)
-        result.extend(dep['file_name'] for dep in get_content(deps))
-        result.extend(included_files)
-        if base_template_name:
-            result.append('templates/' + base_template_name)
-        if args['<file>'].endswith('.md'):
-            result.append('templates/pandoc.txt')
-        print ' '.join(result)
-        sys.exit(0)
-    if plots:
-        format_plot()
-    body = filter_body(args['<file>'])(body)
-    if base_template_name:
-        print env.get_template(base_template_name).render(
-            body=body,
-            deps=get_content(deps),
-            metadata=metadata,
-            **SITE
-        ).encode('utf-8')
+        file_render = FileRender(args['<file>'][0])
+        print file_render.format_test()
     else:
-        print body
+        for f in args['<file>']:
+            if not os.path.isfile(f):
+                continue
+            if not any(f.endswith(ext) for ext in ('.md', '.html', '.jinja')):
+                outpath = f.replace('content/', 'site/', 1)
+                if not os.path.exists(os.path.dirname(outpath)):
+                    os.makedirs(os.path.dirname(outpath))
+                shutil.copy(f, outpath)
+                continue
+            file_render = FileRender(f)
+            file_render.render_to_file()

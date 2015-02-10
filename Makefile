@@ -1,11 +1,10 @@
 .PHONY: test site serve all
 
-SITE = $(shell ./render.py --site)
 all: site
 
 test/%.out.py: content/%.md
 	mkdir -p $(shell dirname $@)
-	./render.py $< --test > $@
+	./render.py --test $< > $@
 	chmod +x $@
 
 test/%: content/%
@@ -28,33 +27,8 @@ test: $(patsubst content/%.md, test/%.out.py, $(shell find content -name "*.md")
 	exit $$errors
 
 
-site/%.html: content/%.md
-	mkdir -p $(shell dirname $@)
-	mkdir -p $(shell dirname .deps/$@.d)
-	./render.py $< --deps $(RENDER_FLAGS) > .deps/$@.d
-	./render.py $< $(RENDER_FLAGS) > $@
-
-site/%.html: content/%.html
-	mkdir -p $(shell dirname $@)
-	mkdir -p $(shell dirname .deps/$@.d)
-	./render.py $< --deps $(RENDER_FLAGS) > .deps/$@.d
-	./render.py $< $(RENDER_FLAGS) > $@
-
-site/%: content/%.jinja
-	mkdir -p $(shell dirname $@)
-	mkdir -p $(shell dirname .deps/$@.d)
-	./render.py $< --deps $(RENDER_FLAGS) > .deps/$@.d
-	./render.py $< $(RENDER_FLAGS) > $@
-
-site/%: content/%
-	mkdir -p $(shell dirname $@)
-	mkdir -p $(shell dirname .deps/$@)
-	touch .deps/$@.d
-	cp $< $@
-
--include $(patsubst site/%, .deps/site/%.d, $(SITE))
-
-site: $(SITE)
+site:
+	./render.py $(shell find content)
 
 watch:
 	while true; do \
