@@ -69,7 +69,7 @@ included_files = []
 
 def include_file(file_name):
     included_files.append(os.path.join(args['<dest_dir>'], file_name))
-    with open(os.path.join('content', file_name), 'r') as f:
+    with open(os.path.join(args['<source_dir>'], file_name), 'r') as f:
         return f.read()
 
 def inline_img(link, alt_text=''):
@@ -249,7 +249,7 @@ def parse_metadata_from_file(file_name):
         root = root[len('./'):]
     d['link'] = root.replace(args['<source_dir>'], '', 1) + APPLY_JINJA.get(ext, ext)
     d['file_name'] = file_name
-    d['post'] = file_name.startswith('content/posts/')
+    d['post'] = file_name.startswith(os.path.join(args['<source_dir>'], 'posts'))
     if 'date' in d:
         d['yyyy-mm'] = '-'.join(str(d['date']).split('-')[:2])
     return d
