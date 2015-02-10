@@ -279,8 +279,11 @@ def filter_body(file_name):
     _, ext = os.path.splitext(file_name)
     return FILTER_BODY.get(ext, strip_metadata)
 
-def build():
+def build(modified_file=None):
     for metadata in get_content('**'):
+        deps = metadata.get('deps', '')
+        if modified_file is not None and not (glob2.fnmatch.fnmatch(modified_file, deps) or metadata['file_name'] == os.path.join(args['<source_dir>'], modified_file)):
+            continue
         f = metadata['file_name']
         if not os.path.isfile(f):
             continue
@@ -309,7 +312,7 @@ def serve():
 
 class OnWriteHandler(pyinotify.ProcessEvent):
     def process_IN_MODIFY(self, event):
-        build()
+        build(os.path.relpath(event.pathname, args['<source_dir>']))
 
 if __name__ == "__main__":
     args = docopt(__doc__)
