@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 """
 usage:
-    render.py build [--dev] <source_dir> <dest_dir>
+    render.py (build|serve) [--dev --source=<dir> --dest=<dir>]
     render.py test <file>
-    render.py serve [--dev] <source_dir> <dest_dir>
+
+options:
+    --dev           Include draft posts.
+    --source=<dir>  Directory of source content [default: content].
+    --dest=<dir>    Directory to generate site [default: site].
 """
 
 from collections import defaultdict
@@ -72,8 +76,8 @@ def invert_by(ds, key, sort=True):
 included_files = []
 
 def include_file(file_name):
-    included_files.append(os.path.join(args['<dest_dir>'], file_name))
-    with open(os.path.join(args['<source_dir>'], file_name), 'r') as f:
+    included_files.append(os.path.join(args['--dest'], file_name))
+    with open(os.path.join(args['--source'], file_name), 'r') as f:
         return f.read()
 
 def inline_img(link, alt_text=''):
@@ -108,10 +112,10 @@ class FileRender(object):
         self.metadata = parse_metadata_from_file(self.file_name)
 
     def get_unique_resource(self, content, ext='.svg'):
-        outdirectory = os.path.dirname(self.file_name).replace(args['<source_dir>'], args['<dest_dir>'], 1)
+        outdirectory = os.path.dirname(self.file_name).replace(args['--source'], args['--dest'], 1)
         outname = base64.urlsafe_b64encode(hashlib.sha1(content).digest()) + ext
         outpath = os.path.join(outdirectory, outname)
-        return outpath, outpath.replace(args['<dest_dir>'], '/', 1)
+        return outpath, outpath.replace(args['--dest'], '/', 1)
 
     def dot(self, source, alt_text=''):
         outpath, outlink = self.get_unique_resource(source)
@@ -206,7 +210,7 @@ sys.exit(failures)
         return body
 
     def render_to_file(self):
-        outpath = os.path.join(args['<dest_dir>'], self.metadata['link'])
+        outpath = os.path.join(args['--dest'], self.metadata['link'])
         if not os.path.exists(os.path.dirname(outpath)):
             os.makedirs(os.path.dirname(outpath))
         with open(outpath, 'w') as f:
@@ -251,9 +255,9 @@ def parse_metadata_from_file(file_name):
     root, ext = os.path.splitext(file_name)
     if root.startswith('./'):
         root = root[len('./'):]
-    d['link'] = root.replace(args['<source_dir>'], '', 1) + APPLY_JINJA.get(ext, ext)
+    d['link'] = root.replace(args['--source'], '', 1) + APPLY_JINJA.get(ext, ext)
     d['file_name'] = file_name
-    d['post'] = file_name.startswith(os.path.join(args['<source_dir>'], 'posts'))
+    d['post'] = file_name.startswith(os.path.join(args['--source'], 'posts'))
     if 'date' in d:
         d['yyyy-mm'] = '-'.join(str(d['date']).split('-')[:2])
     return d
@@ -261,7 +265,7 @@ def parse_metadata_from_file(file_name):
 def get_content(glob):
     if not glob:
         return
-    for filename in glob2.glob(args['<source_dir>'] + glob):
+    for filename in glob2.glob(args['--source'] + glob):
         if not os.path.isfile(filename):
             continue
         metadata = parse_metadata_from_file(filename)
@@ -282,14 +286,14 @@ def filter_body(file_name):
 def build(modified_file=None):
     for metadata in get_content('**'):
         deps = metadata.get('deps', '')
-        if modified_file is not None and not (glob2.fnmatch.fnmatch(modified_file, deps) or metadata['file_name'] == os.path.join(args['<source_dir>'], modified_file)):
+        if modified_file is not None and not (glob2.fnmatch.fnmatch(modified_file, deps) or metadata['file_name'] == os.path.join(args['--source'], modified_file)):
             continue
         f = metadata['file_name']
         if not os.path.isfile(f):
             continue
         if not any(f.endswith(ext) for ext in APPLY_JINJA):
             print 'copying ' + f
-            outpath = f.replace(args['<source_dir>'], args['<dest_dir>'], 1)
+            outpath = f.replace(args['--source'], args['--dest'], 1)
             if not os.path.exists(os.path.dirname(outpath)):
                 os.makedirs(os.path.dirname(outpath))
             shutil.copy(f, outpath)
@@ -301,7 +305,7 @@ def build(modified_file=None):
 
 @bottle.route('<path:path>')
 def serve_path(path):
-    return bottle.static_file(path, args['<dest_dir>'])
+    return bottle.static_file(path, args['--dest'])
 
 @bottle.route('/')
 def serve_root():
@@ -312,30 +316,30 @@ def serve():
 
 class OnWriteHandler(pyinotify.ProcessEvent):
     def process_IN_MODIFY(self, event):
-        build(os.path.relpath(event.pathname, args['<source_dir>']))
+        build(os.path.relpath(event.pathname, args['--source']))
 
 if __name__ == "__main__":
     args = docopt(__doc__)
     if args['test']:
-        file_render = FileRender(args['<file>'][0])
+        file_render = FileRender(args['<file>'])
         print file_render.format_test()
     elif args['build'] or args['serve']:
-        if not os.path.isdir(args['<source_dir>']):
-            print args['<source_dir>'] + ' is not a dir'
+        if not os.path.isdir(args['--source']):
+            print args['--source'] + ' is not a dir'
             sys.exit(1)
-        if not os.path.isdir(args['<dest_dir>']):
-            print args['<dest_dir>'] + ' is not a dir'
+        if not os.path.isdir(args['--dest']):
+            print args['--dest'] + ' is not a dir'
             sys.exit(1)
-        if not args['<source_dir>'].endswith('/'):
-            args['<source_dir>'] += '/'
-        if not args['<dest_dir>'].endswith('/'):
-            args['<dest_dir>'] += '/'
+        if not args['--source'].endswith('/'):
+            args['--source'] += '/'
+        if not args['--dest'].endswith('/'):
+            args['--dest'] += '/'
         build()
     if args['serve']:
         wm = pyinotify.WatchManager()
         handler = OnWriteHandler()
         notifier = pyinotify.Notifier(wm, default_proc_fun=handler)
-        wm.add_watch(args['<source_dir>'], pyinotify.ALL_EVENTS, rec=True)
+        wm.add_watch(args['--source'], pyinotify.ALL_EVENTS, rec=True)
         t = threading.Thread(target=serve)
         t.daemon = True
         t.start()

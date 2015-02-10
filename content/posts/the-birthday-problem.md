@@ -46,7 +46,22 @@ Some examples.
 0.0027397260273972603
 >>> birthday(3)
 0.008204165884781385
+>>> birthday(23)
+0.5072972343239854
 {% endfilter %}
+
+Once there are at least 23 people, the probability of a shared birthday is over 50 percent!
+
+Another approach would be to calculate the probability of no shared birthdays (let's call that $P'(n)$), and then subtract it from 1.
+We'll again split it into two mutually exclusive events.
+
+- Event 1: There is a birthday shared among the first $n - 1$ people. (Probability is $1 - P'(n)$).
+- Event 2: There is not a birthday shared among the first $n - 1$ people. (Probability is $P'(n)$).
+
+In event 1, there is a zero percent probability of no shared birthdays. In event 2,
+there are $n - 1$ distinct birthdays taken already, so the probability of no shared birthdays
+is the probability of the $n$th person having one of the $k - n$ available birthdays.
+$P'(n) = (1 - P'(n-1)) 0 + P'(n-1)(k-n)/k = P'(n-1)(k-n)/k = (k-1)/k (k-2)/k \dots (k-n)/k$.
 
 {% filter plot("Probability of a shared birthday.") %}
 data = [birthday(n) for n in xrange(1, 80)]

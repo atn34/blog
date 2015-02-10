@@ -29,10 +29,10 @@ test: $(patsubst content/%.md, test/%.out.py, $(shell find content -name "*.md")
 
 site:
 	mkdir -p site
-	./render.py content site
+	./render.py build
 
 serve:
-	./render.py serve content site --dev; \
+	./render.py serve --dev; \
 
 clean:
 	rm -rf test site/* *.pyc
