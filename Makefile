@@ -31,12 +31,8 @@ site:
 	mkdir -p site
 	./render.py content site
 
-watch:
-	while true; do \
-		./render.py --dev content site; \
-		echo done; \
-		inotifywait -qre close_write .; \
-	done;
+serve:
+	./render.py serve content site --dev; \
 
 clean:
 	rm -rf test site/* *.pyc
