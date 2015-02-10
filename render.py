@@ -4,19 +4,21 @@ usage:
     render.py [--dev] <source_dir> <dest_dir>
     render.py --test <file>
 """
-import sys
-import os
+
 from collections import defaultdict
 from docopt import docopt
-import itertools
-import glob2
 from subprocess import Popen, PIPE, check_output
-import hashlib
+
 import base64
-import tempfile
+import glob2
+import hashlib
+import itertools
 import jinja2
-import yaml
+import os
 import shutil
+import sys
+import tempfile
+import yaml
 
 def pandoc(source):
     metadata = parse_metadata(source.splitlines())
