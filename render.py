@@ -30,7 +30,7 @@ import yaml
 
 def pandoc(source):
     metadata = parse_metadata(source.splitlines())
-    flags = ['--standalone', '--template=templates/pandoc.txt']
+    flags = ['--standalone', '--template=templates/pandoc.txt', '--mathjax']
     if metadata.get('tableofcontents', True):
         flags.append('--toc')
     p = Popen(['pandoc'] + flags, stdout=PIPE, stdin=PIPE, stderr=PIPE)
