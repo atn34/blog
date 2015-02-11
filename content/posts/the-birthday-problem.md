@@ -19,9 +19,9 @@ Since these events are mutually exclusive, we can add the probability of a share
 in each event to get $P(n)$. In event 1, the probability of a shared birthday is $1$. In
 event 2, each of the first $n - 1$ people has a distinct birthday. So the probability of a
 shared birthday is the probability that the $n$th person shares a birthday with one of the
-first $n - 1$ people: $(n - 1)/k$.
+first $n - 1$ people: $\frac{(n - 1)}{k}$.
 
-Therefore $P(n) = P(n - 1) + (1 - P(n - 1))(n - 1)/k$.
+Therefore $P(n) = P(n - 1) + (1 - P(n - 1))\frac{(n - 1)}{k}$.
 
 Now we can compute $P(n)$. Example implementation in python.
 
@@ -51,18 +51,7 @@ Some examples.
 
 Once there are at least 23 people, the probability of a shared birthday is over 50 percent!
 
-Another approach would be to calculate the probability of no shared birthdays (let's call that $P'(n)$), and then subtract it from 1.
-We'll again split it into two mutually exclusive events.
-
-- Event 1: There is a birthday shared among the first $n - 1$ people. (Probability is $1 - P'(n)$).
-- Event 2: There is not a birthday shared among the first $n - 1$ people. (Probability is $P'(n)$).
-
-In event 1, there is a zero percent probability of no shared birthdays. In event 2,
-there are $n - 1$ distinct birthdays taken already, so the probability of no shared birthdays
-is the probability of the $n$th person having one of the $k - n$ available birthdays.
-$P'(n) = (1 - P'(n-1)) 0 + P'(n-1)(k-n)/k = P'(n-1)(k-n)/k = (k-1)/k (k-2)/k \dots (k-n)/k$.
-
-{% filter plot("Probability of a shared birthday.") %}
+{% filter plot("Probability of a shared birthday if $n$ people are in a room.") %}
 data = [birthday(n) for n in xrange(1, 80)]
 plt.plot(data)
 plt.xlabel("$n$")
