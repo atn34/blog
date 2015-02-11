@@ -3,7 +3,6 @@ title: Categories
 deps: "posts/*.md"
 base: categories.html
 ---
-<h1>Categories</h1>
 <div class="tags-categories">
 {% for category, posts in deps|invert_by('categories') %}
 <h2 id="{{category}}">{{category}}</h2>

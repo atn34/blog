@@ -3,7 +3,6 @@ title: Archive
 deps: "posts/*.md"
 base: archive.html
 ---
-<h1>Archive</h1>
 <div class="tags-categories">
 {% for date, posts in deps|invert_by('yyyy-mm')|sort(reverse=True) %}
 <h2>{{date}}</h2>

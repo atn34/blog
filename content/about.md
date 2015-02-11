@@ -1,3 +1,7 @@
+---
+base: about.html
+---
+
 Andrew Noyes' personal blog.
 
 Built with

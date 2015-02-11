@@ -39,7 +39,7 @@ def pandoc(source):
 SITE = {
     'production_url': 'www.atn34.com',
     'title': 'Ignorance is Bliss',
-    'description': 'TODO description',
+    'description': 'Ramblings about Computer Science',
 }
 
 APPLY_JINJA = {
