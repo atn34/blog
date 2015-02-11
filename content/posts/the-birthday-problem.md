@@ -12,8 +12,8 @@ are uniformly distributed throughout the year.
 For $n \leq 1$, $P(0) = P(1) = 0$, as there aren't even two people.
 For $n > 1$, let's consider two events.
 
-- Event 1: There is a birthday shared among the first $n - 1$ people. (Probability is $P(n)$).
-- Event 2: There is not a birthday shared among the first $n - 1$ people. (Probability is $1 - P(n)$).
+- Event 1: There is a birthday shared among the first $n - 1$ people. (Probability is $P(n - 1)$).
+- Event 2: There is not a birthday shared among the first $n - 1$ people. (Probability is $1 - P(n - 1)$).
 
 Since these events are mutually exclusive, we can add the probability of a shared birthday
 in each event to get $P(n)$. In event 1, the probability of a shared birthday is $1$. In
