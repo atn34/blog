@@ -28,6 +28,7 @@ import tempfile
 import threading
 import yaml
 
+
 def pandoc(source):
     metadata = parse_metadata(source.splitlines())
     flags = ['--standalone', '--template=templates/pandoc.txt', '--mathjax']
@@ -52,9 +53,11 @@ FILTER_BODY = {
     '.md': pandoc,
 }
 
+
 def _test():
     import doctest
     return doctest.testmod()
+
 
 def invert_by(ds, key, sort=True):
     """
@@ -76,19 +79,23 @@ def invert_by(ds, key, sort=True):
 
 included_files = []
 
+
 def include_file(file_name):
     included_files.append(os.path.join(args['--dest'], file_name))
     with open(os.path.join(args['--source'], file_name), 'r') as f:
         return f.read()
 
+
 def inline_img(link, alt_text=''):
     return '![%s](%s)' % (alt_text, link)
+
 
 def codeblock(source, css_class=''):
     return """
 ```%s%s
 ```
 """ % (css_class, source)
+
 
 class FileRender(object):
 
@@ -113,8 +120,10 @@ class FileRender(object):
         self.metadata = parse_metadata_from_file(self.file_name)
 
     def get_unique_resource(self, content, ext='.svg'):
-        outdirectory = os.path.dirname(self.file_name).replace(args['--source'], args['--dest'], 1)
-        outname = base64.urlsafe_b64encode(hashlib.sha1(content).digest()) + ext
+        outdirectory = os.path.dirname(self.file_name).replace(
+            args['--source'], args['--dest'], 1)
+        outname = base64.urlsafe_b64encode(
+            hashlib.sha1(content).digest()) + ext
         outpath = os.path.join(outdirectory, outname)
         return outpath, outpath.replace(args['--dest'], '/', 1)
 
@@ -124,7 +133,8 @@ class FileRender(object):
             if not os.path.exists(os.path.dirname(outpath)):
                 os.makedirs(os.path.dirname(outpath))
             with open(outpath, 'w') as f:
-                p = Popen(['dot','-Tsvg'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+                p = Popen(
+                    ['dot', '-Tsvg'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
                 f.write(p.communicate(input=source)[0])
         return inline_img(outlink, alt_text)
 
@@ -167,7 +177,9 @@ import sys
 failures = doctest.testmod()[0] or 0
 failures += shelldoctest.testmod()[0] or 0
 sys.exit(failures)
-''' % ('\n'.join(self.python_repls), '\n'.join(self.bash_prompts), '\n'.join(self.python_codes))
+''' % ('\n'.join(self.python_repls),
+            '\n'.join(self.bash_prompts),
+            '\n'.join(self.python_codes))
 
     def bash_prompt(self, source):
         self.bash_prompts.append(source)
@@ -191,7 +203,8 @@ sys.exit(failures)
 
     def render(self):
         deps = self.metadata.get('deps', '')
-        base_template_name = self.metadata.get('base', default_template_name(self.file_name))
+        base_template_name = self.metadata.get(
+            'base', default_template_name(self.file_name))
         with open(self.file_name, 'r') as f:
             body = self.env.from_string(f.read().decode('utf-8')).render(
                 deps=get_content(deps),
@@ -217,6 +230,7 @@ sys.exit(failures)
         with open(outpath, 'w') as f:
             f.write(self.render())
 
+
 def strip_metadata(body):
     dddash_count = 0
     result = []
@@ -227,6 +241,7 @@ def strip_metadata(body):
         if dddash_count != 1:
             result.append(line)
     return '\n'.join(result)
+
 
 def parse_metadata(lines):
     """
@@ -250,18 +265,21 @@ def parse_metadata(lines):
             break
     return yaml.load('\n'.join(yaml_lines)) or {}
 
+
 def parse_metadata_from_file(file_name):
     with open(file_name, 'r') as f:
         d = parse_metadata(f)
     root, ext = os.path.splitext(file_name)
     if root.startswith('./'):
         root = root[len('./'):]
-    d['link'] = root.replace(args['--source'], '', 1) + APPLY_JINJA.get(ext, ext)
+    d['link'] = root.replace(
+        args['--source'], '', 1) + APPLY_JINJA.get(ext, ext)
     d['file_name'] = file_name
     d['post'] = file_name.startswith(os.path.join(args['--source'], 'posts'))
     if 'date' in d:
         d['yyyy-mm'] = '-'.join(str(d['date']).split('-')[:2])
     return d
+
 
 def get_content(glob):
     if not glob:
@@ -273,6 +291,7 @@ def get_content(glob):
         if args['test'] or args['--dev'] or not metadata.get('draft', False):
             yield metadata
 
+
 def default_template_name(file_name):
     _, ext = os.path.splitext(file_name)
     return {
@@ -280,14 +299,19 @@ def default_template_name(file_name):
         '.html': 'default.html',
     }.get(ext)
 
+
 def filter_body(file_name):
     _, ext = os.path.splitext(file_name)
     return FILTER_BODY.get(ext, strip_metadata)
 
+
 def build(modified_file=None):
     for metadata in get_content('**'):
         deps = metadata.get('deps', '')
-        if modified_file is not None and not (glob2.fnmatch.fnmatch(modified_file, deps) or metadata['file_name'] == os.path.join(args['--source'], modified_file)):
+        depends = modified_file is not None and not (glob2.fnmatch.fnmatch(
+            modified_file, deps) or metadata['file_name'] == os.path.join(
+                args['--source'], modified_file))
+        if not depends:
             continue
         f = metadata['file_name']
         if not os.path.isfile(f):
@@ -304,18 +328,23 @@ def build(modified_file=None):
         file_render.render_to_file()
     print 'done.'
 
+
 @bottle.route('<path:path>')
 def serve_path(path):
     return bottle.static_file(path, args['--dest'])
+
 
 @bottle.route('/')
 def serve_root():
     return serve_path('/index.html')
 
+
 def serve():
     bottle.run(host='localhost', port=8000)
 
+
 class OnWriteHandler(pyinotify.ProcessEvent):
+
     def process_IN_MODIFY(self, event):
         build(os.path.relpath(event.pathname, args['--source']))
 
