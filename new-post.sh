@@ -22,6 +22,7 @@ title:  $TITLE
 date:   $DATE
 categories: []
 draft: true
+base: post.html
 ---
 
 EOF

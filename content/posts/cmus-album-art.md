@@ -2,6 +2,7 @@
 title:  Cmus Album Art
 date:   2014-04-05
 categories: [bash,cmus,beets,music]
+base: post.html
 ---
 
 # cmus #

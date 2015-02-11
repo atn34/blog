@@ -1,5 +1,6 @@
 ---
 title:  Twitter Fortune
+base: post.html
 date:   2014-04-04
 categories: [bash,twitter,lilb]
 ---

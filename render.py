@@ -39,6 +39,7 @@ def pandoc(source):
 SITE = {
     'production_url': 'www.atn34.com',
     'title': 'Ignorance is Bliss',
+    'description': 'TODO description',
 }
 
 APPLY_JINJA = {
@@ -143,7 +144,7 @@ class FileRender(object):
     def format_test(self):
         deps = self.metadata.get('deps', '')
         with open(self.file_name, 'r') as f:
-            self.env.from_string(f.read()).render(
+            self.env.from_string(f.read().decode('utf-8')).render(
                 deps=get_content(deps),
                 metadata=self.metadata,
                 **SITE
@@ -192,7 +193,7 @@ sys.exit(failures)
         deps = self.metadata.get('deps', '')
         base_template_name = self.metadata.get('base', default_template_name(self.file_name))
         with open(self.file_name, 'r') as f:
-            body = self.env.from_string(f.read()).render(
+            body = self.env.from_string(f.read().decode('utf-8')).render(
                 deps=get_content(deps),
                 metadata=self.metadata,
                 **SITE

@@ -1,10 +1,9 @@
 ---
+base: post.html
 title: The Birthday Problem
 date: 2015-02-07
 categories: [probability]
 ---
-
-# The Birthday Problem #
 
 Suppose there are $n$ people in a room, in a world with $k$ days in a year.
 What's the probability that two people share a birthday? Assume that birthdays

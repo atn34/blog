@@ -1,5 +1,6 @@
 ---
 title: First Post!
+base: post.html
 date: 2015-02-01
 categories: [python]
 ---
