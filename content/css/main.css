@@ -79,6 +79,10 @@ caption {
     padding-bottom: 0.2em;
 }
 
+td, th {
+    padding: 6px;
+}
+
 /* ---- Definition lists ---- */
 /* The whole list */
 dl {
