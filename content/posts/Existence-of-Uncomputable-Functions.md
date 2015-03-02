@@ -43,5 +43,5 @@ $$f(i) = \begin{cases} 0 & \mbox{if } f_i(i) = 1 \\ 1 & \mbox{if } f_i(i) = 0\en
 Since $f$ differs from $f_i$ on the $i$th input, $f$ cannot be one of the functions enumerated.
 We cannot enumerate functions $f : N \rightarrow \{0, 1\}$.
 
-Since we cannot enumerate functions, but we can enumerate programs there exists a function
+Since we cannot enumerate functions, but we can enumerate programs, there exists a function
 that has no program which computes it.
