@@ -20,7 +20,7 @@ git clone $DEPLOYREMOTE $DEPLOYDIR
 
 git archive --format=tar $REV | (cd $SOURCEDIR && tar xf -)
 
-./render.py build --dest $DEPLOYDIR --source $SOURCEDIR/content
+./render.py build --dest $DEPLOYDIR --source $SOURCEDIR/content || exit
 
 (cd $DEPLOYDIR && \
     git add . && \

@@ -2,7 +2,6 @@
 title:  Existence of Uncomputable Functions
 date: 2015-03-02
 categories: []
-draft: true
 base: post.html
 ---
 
