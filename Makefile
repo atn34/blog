@@ -15,6 +15,7 @@ test: $(patsubst content/%.md, test/%.out.py, $(shell find content -name "*.md")
 	$(patsubst content/%, test/%, $(shell find content -type f ! -name "*.md" ! -name "*jinja")) \
 	render_test.py
 	@errors=0; \
+	count=0; \
 	pwd=$$(pwd); \
 	for test in $^ ; do \
 		if [ -x $$test ] ; then \

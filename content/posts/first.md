@@ -60,7 +60,7 @@ graph {
 
 {% filter plot("Embedded plot!") %}
 import random
-data = [random.random() for x in xrange(100)]
+data = [random.random() for x in range(100)]
 plt.plot(data)
 {% endfilter %}
 

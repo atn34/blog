@@ -52,7 +52,7 @@ Some examples.
 Once there are at least 23 people, the probability of a shared birthday is over 50 percent!
 
 {% filter plot("Probability of a shared birthday if $n$ people are in a room.") %}
-data = [birthday(n) for n in xrange(1, 80)]
+data = [birthday(n) for n in range(1, 80)]
 plt.plot(data)
 plt.xlabel("$n$")
 plt.ylabel("$P(n)$")

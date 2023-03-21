@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 usage:
     render.py (build|serve) [--dev --source=<dir> --dest=<dir>]
@@ -12,6 +12,7 @@ options:
 
 from collections import defaultdict
 from docopt import docopt
+from identify import identify
 from subprocess import Popen, PIPE, check_output
 
 import bottle
@@ -21,7 +22,6 @@ import hashlib
 import itertools
 import jinja2
 import os
-import pyinotify
 import shutil
 import sys
 import tempfile
@@ -34,7 +34,7 @@ def pandoc(source):
     if metadata.get('tableofcontents', True):
         flags.append('--toc')
     p = Popen(['pandoc'] + flags, stdout=PIPE, stdin=PIPE, stderr=PIPE)
-    return p.communicate(input=source)[0].decode('utf-8')
+    return p.communicate(input=source.encode('utf-8'))[0].decode('utf-8')
 
 SITE = {
     'production_url': 'www.atn34.com',
@@ -70,7 +70,7 @@ def invert_by(ds, key, sort=True):
         for v in vs:
             result[v].append(d)
     if sort:
-        return sorted(result.iteritems())
+        return sorted(result.items())
     else:
         return result.iteritems()
 
@@ -114,7 +114,7 @@ class FileRender(object):
 
     def get_unique_resource(self, content, ext='.svg'):
         outdirectory = os.path.dirname(self.file_name).replace(args['--source'], args['--dest'], 1)
-        outname = base64.urlsafe_b64encode(hashlib.sha1(content).digest()) + ext
+        outname = base64.urlsafe_b64encode(hashlib.sha1(content.encode('utf-8')).digest()).decode('utf-8') + ext
         outpath = os.path.join(outdirectory, outname)
         return outpath, outpath.replace(args['--dest'], '/', 1)
 
@@ -123,9 +123,9 @@ class FileRender(object):
         if not args['test'] and not os.path.isfile(outpath):
             if not os.path.exists(os.path.dirname(outpath)):
                 os.makedirs(os.path.dirname(outpath))
-            with open(outpath, 'w') as f:
+            with open(outpath, 'wb') as f:
                 p = Popen(['dot','-Tsvg'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
-                f.write(p.communicate(input=source)[0])
+                f.write(p.communicate(input=source.encode('utf-8'))[0])
         return inline_img(outlink, alt_text)
 
     def plot(self, source, alt_text=''):
@@ -144,30 +144,24 @@ class FileRender(object):
     def format_test(self):
         deps = self.metadata.get('deps', '')
         with open(self.file_name, 'r') as f:
-            self.env.from_string(f.read().decode('utf-8')).render(
+            self.env.from_string(f.read()).render(
                 deps=get_content(deps),
                 metadata=self.metadata,
                 **SITE
             )
-        return '''#!/usr/bin/env python
+        return '''#!/usr/bin/env python3
 class Py(object):
     """%s
 """
     pass
 
-class Bash(object):
-    """%s
-"""
-    pass
 %s
 
 import doctest
-import shelldoctest
 import sys
 failures = doctest.testmod()[0] or 0
-failures += shelldoctest.testmod()[0] or 0
 sys.exit(failures)
-''' % ('\n'.join(self.python_repls), '\n'.join(self.bash_prompts), '\n'.join(self.python_codes))
+''' % ('\n'.join(self.python_repls), '\n'.join(self.python_codes))
 
     def bash_prompt(self, source):
         self.bash_prompts.append(source)
@@ -193,7 +187,7 @@ sys.exit(failures)
         deps = self.metadata.get('deps', '')
         base_template_name = self.metadata.get('base', default_template_name(self.file_name))
         with open(self.file_name, 'r') as f:
-            body = self.env.from_string(f.read().decode('utf-8')).render(
+            body = self.env.from_string(f.read()).render(
                 deps=get_content(deps),
                 metadata=self.metadata,
                 **SITE
@@ -207,7 +201,7 @@ sys.exit(failures)
                 deps=get_content(deps),
                 metadata=self.metadata,
                 **SITE
-            ).encode('utf-8')
+            )
         return body
 
     def render_to_file(self):
@@ -230,12 +224,12 @@ def strip_metadata(body):
 
 def parse_metadata(lines):
     """
-    >>> parse_metadata(['---', 'x: 1', 'y: 2', '---'])
-    {'y': 2, 'x': 1}
-    >>> parse_metadata(['---', 'x: 1\\n', 'y: 2\\n', '---'])
-    {'y': 2, 'x': 1}
-    >>> parse_metadata(['---', 'x: 1', 'y: 2', '---', 'slkjd'])
-    {'y': 2, 'x': 1}
+    >>> sorted(parse_metadata(['---', 'x: 1', 'y: 2', '---']).items())
+    [('x', 1), ('y', 2)]
+    >>> sorted(parse_metadata(['---', 'x: 1\\n', 'y: 2\\n', '---']).items())
+    [('x', 1), ('y', 2)]
+    >>> sorted(parse_metadata(['---', 'x: 1', 'y: 2', '---', 'slkjd']).items())
+    [('x', 1), ('y', 2)]
     """
     dddash_count = 0
     yaml_lines = []
@@ -251,8 +245,10 @@ def parse_metadata(lines):
     return yaml.load('\n'.join(yaml_lines)) or {}
 
 def parse_metadata_from_file(file_name):
-    with open(file_name, 'r') as f:
-        d = parse_metadata(f)
+    d = {}
+    if 'text' in identify.tags_from_path(file_name):
+        with open(file_name, 'r') as f:
+            d = parse_metadata(f)
     root, ext = os.path.splitext(file_name)
     if root.startswith('./'):
         root = root[len('./'):]
@@ -293,17 +289,16 @@ def build(modified_file=None):
         if not os.path.isfile(f):
             continue
         if not any(f.endswith(ext) for ext in APPLY_JINJA):
-            print 'copying ' + f
+            print('copying ' + f)
             outpath = f.replace(args['--source'], args['--dest'], 1)
             if not os.path.exists(os.path.dirname(outpath)):
                 os.makedirs(os.path.dirname(outpath))
             shutil.copy(f, outpath)
             continue
-        print 'rendering ' + f
+        print('rendering ' + f)
         file_render = FileRender(f)
         file_render.render_to_file()
-    print 'done.'
-
+    print('done.')
 @bottle.route('<path:path>')
 def serve_path(path):
     return bottle.static_file(path, args['--dest'])
@@ -315,21 +310,18 @@ def serve_root():
 def serve():
     bottle.run(host='localhost', port=8000)
 
-class OnWriteHandler(pyinotify.ProcessEvent):
-    def process_IN_MODIFY(self, event):
-        build(os.path.relpath(event.pathname, args['--source']))
 
 if __name__ == "__main__":
     args = docopt(__doc__)
     if args['test']:
         file_render = FileRender(args['<file>'])
-        print file_render.format_test()
+        print(file_render.format_test())
     elif args['build'] or args['serve']:
         if not os.path.isdir(args['--source']):
-            print args['--source'] + ' is not a dir'
+            print(args['--source'] + ' is not a dir')
             sys.exit(1)
         if not os.path.isdir(args['--dest']):
-            print args['--dest'] + ' is not a dir'
+            print(args['--dest'] + ' is not a dir')
             sys.exit(1)
         if not args['--source'].endswith('/'):
             args['--source'] += '/'
@@ -337,11 +329,7 @@ if __name__ == "__main__":
             args['--dest'] += '/'
         build()
     if args['serve']:
-        wm = pyinotify.WatchManager()
-        handler = OnWriteHandler()
-        notifier = pyinotify.Notifier(wm, default_proc_fun=handler)
-        wm.add_watch(args['--source'], pyinotify.ALL_EVENTS, rec=True)
         t = threading.Thread(target=serve)
         t.daemon = True
         t.start()
-        notifier.loop()
+        t.join()
