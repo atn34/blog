@@ -29,11 +29,12 @@ programs, as programs are a subset of strings, and we can enumerate strings as f
 
 Let's try enumerating functions. The $i$th row in represents the $i$th function.
 
-|----------|----------|---------|-----|
-| $f_0(0)$ | $f_0(1)$ |$f_0(2)$ |$...$|
-| $f_1(0)$ | $f_1(1)$ |$f_1(2)$ |$...$|
-| $f_2(0)$ | $f_2(1)$ |$f_2(2)$ |$...$|
-| $...$    | $...$    |$...$    |$...$|
+|          |          |          |       |
+|----------|----------|----------|-------|
+| $f_0(0)$ | $f_0(1)$ | $f_0(2)$ | $...$ |
+| $f_1(0)$ | $f_1(1)$ | $f_1(2)$ | $...$ |
+| $f_2(0)$ | $f_2(1)$ | $f_2(2)$ | $...$ |
+| $...$    | $...$    | $...$    | $...$ |
 
 Consider the following function.
 
