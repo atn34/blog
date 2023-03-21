@@ -29,31 +29,37 @@ user's tweets.
 
 # Twitter #
 
-I found a nice tool made by Kai Hendry called [greptweet](http://greptweet.com/)
+I found a nice tool made by Kai Hendry called ~~greptweet~~[^1]
 that can request up to 3000 tweets, with a nice webapi.
 
 To use it, first fetch the tweets
 
+<del>
 ```terminal
 $ curl -s http://greptweet.com/f/$TWITTER_HANDLE > /dev/null
 ```
+</del>
 
 When that's done, you can download the tweets like so
 
+<del>
 ```terminal
 $ curl -s http://greptweet.com/u/lilbthebasedgod/tweets.txt | head -1
 451980332581928960|Fri Apr 04 07:11:23 +0000 2014|Smile for me, I love you - Lil B
 ```
+</del>
 
 To use the tweets with fortune,
 we need to format the tweets the way `fortune` wants:
 
+<del>
 ```terminal
 $ curl -s http://greptweet.com/u/$TWITTER_HANDLE/tweets.txt \
     | cut -f3 -d'|' \
     | grep -v '\<RT\>\|\<http\|@' \
     | awk "1; { print \"\t\t-- @$TWITTER_HANDLE\n%\"; }"
 ```
+</del>
 
 `cut -f3 -d'|'` to keep field 3 where fields are delimited by '|',
 `grep -v '\<RT\>\|\<http\|@'` to filter out the retweets, tweets with links,
@@ -99,3 +105,5 @@ let g:startify_custom_header =
 # Final Result #
 
 ![Final result](http://i.imgur.com/MKYrQeO.png?1?8351)
+
+[^1]: Greptweet does not appear to be a thing anymore.
