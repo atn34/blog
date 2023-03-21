@@ -1,3 +1,5 @@
+<style>$highlighting-css$</style>
+
 $if(toc)$
 <div class="toc" id="$idprefix$TOC">
 <div class="meta-title">Table of Contents</div>
