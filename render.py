@@ -242,7 +242,7 @@ def parse_metadata(lines):
             yaml_lines.append(line)
         elif dddash_count == 2:
             break
-    return yaml.load('\n'.join(yaml_lines)) or {}
+    return yaml.safe_load('\n'.join(yaml_lines)) or {}
 
 def parse_metadata_from_file(file_name):
     d = {}
